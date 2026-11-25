@@ -1,0 +1,1285 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Open Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Open Desk is a global news and blog platform: every story, every corner, open to all.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700;900&family=Noto+Naskh+Arabic:wght@400;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap">
+<style>
+/* Layout concept: classic broadcast-news masthead (utility bar, ticker, wordmark, sticky blue nav) over a
+   grid of image-led story cards. Blue carries structure, red is reserved for Breaking/Live only. */
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --tint:#E8F0FB; --ink:#1A1A1A; --muted:#566176; --line:#D8E0EE;
+  --blue:#0B3C8A; --blue-d:#082C66; --link:#0B3C8A; --btn:#0B3C8A; --btn-ink:#FFFFFF;
+  --red:#D62828; --focus:#1D6BFF; --shadow:0 10px 30px rgba(11,60,138,.16);
+  --serif:'Merriweather',Georgia,'Times New Roman',serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B111F; --surface:#121A2C; --tint:#16233F; --ink:#E9EEF8; --muted:#A3B0C8; --line:#26334F;
+    --link:#8DB8FF; --btn:#2F6FE0; --shadow:0 10px 30px rgba(0,0,0,.5); --focus:#8DB8FF; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B111F; --surface:#121A2C; --tint:#16233F; --ink:#E9EEF8; --muted:#A3B0C8; --line:#26334F;
+  --link:#8DB8FF; --btn:#2F6FE0; --shadow:0 10px 30px rgba(0,0,0,.5); --focus:#8DB8FF; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.6;background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
+html[lang="ar"] body,html[lang="ur"] body{font-family:'Noto Naskh Arabic',var(--sans);line-height:1.9}
+html[lang="hi"] body{font-family:'Noto Sans Devanagari',var(--sans)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:90;background:var(--blue-d)}
+body.lock{overflow:hidden}
+img,svg{max-width:100%}
+a{color:var(--link)}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.25;margin:0;text-wrap:balance}
+p{margin:0}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1240px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 20px;border:1px solid transparent;border-radius:4px;background:var(--btn);color:var(--btn-ink);font-weight:600;text-decoration:none;transition:filter .15s,background .15s}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;color:var(--link);border-color:var(--line)}
+.btn.ghost:hover{background:var(--tint);filter:none}
+.btn.white{background:#fff;color:var(--blue)}
+.btn.sm{min-height:34px;padding:0 14px;font-size:.875rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.icon-btn{width:38px;height:38px;display:inline-grid;place-items:center;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:50%;padding:0;transition:background .15s}
+.icon-btn:hover{background:rgba(255,255,255,.16)}
+.icon-btn.line{border-color:var(--line);color:var(--ink)}
+.icon-btn.line:hover{background:var(--tint)}
+.icon-btn svg{width:18px;height:18px}
+
+/* top bar */
+.topbar{background:var(--blue-d);color:#fff;font-size:.8125rem}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px}
+.tb-date{opacity:.9;white-space:nowrap}
+.tb-ctrl{display:flex;align-items:center;gap:8px;margin-inline-start:auto}
+select.lang{height:38px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:19px;padding:0 12px;font:inherit;font-size:.8125rem}
+select.lang option{color:#111;background:#fff}
+
+/* ticker */
+.ticker{background:var(--surface);border-bottom:1px solid var(--line)}
+.ticker .wrap{display:flex;align-items:center;gap:12px;min-height:44px}
+.brk{flex:none;background:var(--red);color:#fff;font-weight:700;font-size:.78rem;padding:3px 10px;border-radius:3px;display:inline-flex;align-items:center;gap:6px}
+.brk::before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+.tk-view{flex:1;min-width:0;overflow:hidden;direction:ltr}
+.tk-track{display:inline-flex;white-space:nowrap;animation:tick 90s linear infinite;will-change:transform}
+.tk-view:hover .tk-track,.tk-track.paused{animation-play-state:paused}
+.tk-track a{color:var(--ink);text-decoration:none;font-size:.9rem;font-weight:500;padding-right:44px;position:relative}
+.tk-track a::after{content:"";position:absolute;right:20px;top:50%;width:5px;height:5px;background:var(--blue);transform:translateY(-50%) rotate(45deg)}
+.tk-track a:hover{text-decoration:underline}
+@keyframes tick{to{transform:translateX(-50%)}}
+.tk-btn{flex:none;width:30px;height:30px;border:1px solid var(--line);background:transparent;border-radius:50%;color:var(--ink);display:grid;place-items:center;padding:0}
+.tk-btn svg{width:12px;height:12px}
+
+/* masthead */
+.mast .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:16px;padding-bottom:16px}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--link)}
+.logo svg{width:46px;height:46px;flex:none}
+.logo b{display:block;font:900 clamp(1.7rem,4vw,2.2rem)/1 var(--serif);letter-spacing:-.02em}
+.logo small{display:block;font:500 .72rem/1.3 var(--sans);color:var(--muted);margin-top:4px}
+.ad{display:grid;place-items:center;text-align:center;gap:2px;border:1px dashed var(--line);background:var(--tint);color:var(--muted);font-size:.78rem;text-decoration:none;padding:8px}
+.ad b{font-weight:600;color:var(--ink);font-size:.8rem}
+.ad:hover{border-color:var(--btn)}
+.ad.banner{width:468px;max-width:100%;height:64px}
+.ad.side{aspect-ratio:300/250;width:100%}
+.ad.inline{height:130px;margin:34px 0}
+@media (max-width:1000px){.mast .ad{display:none}}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;background:var(--blue);color:#fff}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;min-height:52px}
+.nav ul{list-style:none;margin:0;padding:0;display:flex;align-items:stretch}
+.nav a.nl,.nav button.nl{display:flex;align-items:center;height:52px;padding:0 14px;color:#fff;text-decoration:none;font-weight:600;font-size:.9375rem;background:none;border:0;border-bottom:3px solid transparent;white-space:nowrap}
+.nav a.nl:hover,.nav button.nl:hover{background:rgba(255,255,255,.12)}
+.nav a.nl[aria-current="page"]{border-bottom-color:#fff}
+.nav .more{position:relative}
+.sub{position:absolute;top:100%;inset-inline-start:0;min-width:200px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);display:none;flex-direction:column;padding:6px 0;border-radius:0 0 6px 6px}
+.sub.open{display:flex}
+.sub a{padding:10px 18px;color:var(--ink);text-decoration:none;font-size:.9rem}
+.sub a:hover{background:var(--tint)}
+.burger{display:none}
+@media (max-width:940px){
+  .burger{display:inline-grid;margin-inline-start:auto}
+  .nav .wrap{flex-wrap:wrap}
+  .nav ul{display:none;flex-direction:column;width:100%;padding-bottom:10px}
+  .nav ul.open{display:flex}
+  .nav a.nl,.nav button.nl{height:46px;border-bottom:0;border-inline-start:3px solid transparent}
+  .nav a.nl[aria-current="page"]{border-inline-start-color:#fff;background:rgba(255,255,255,.1)}
+  .nav .more>button{display:none}
+  .sub{position:static;display:flex;border:0;box-shadow:none;background:transparent;padding:0}
+  .sub a{color:#fff;padding:0 14px;height:46px;display:flex;align-items:center;font-weight:600;font-size:.9375rem;border-inline-start:3px solid transparent}
+  .sub a:hover{background:rgba(255,255,255,.12)}
+  .nav-title{font-weight:700;font-family:var(--serif)}
+}
+@media (min-width:941px){.nav-title{display:none}}
+
+/* generic */
+main{outline:0;min-height:60vh}
+.sec{padding:44px 0}
+.sec.tight{padding:28px 0}
+.band{background:var(--tint)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-top:3px solid var(--btn);padding-top:12px;margin-bottom:22px}
+.sec-h h2{font-size:1.5rem}
+.sec-h a{font-weight:600;font-size:.9rem;text-decoration:none;white-space:nowrap}
+.sec-h a:hover{text-decoration:underline}
+.grid{display:grid;gap:30px 24px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1000px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:44px}
+@media (max-width:1020px){.cols{grid-template-columns:minmax(0,1fr)}}
+.stack{display:grid;gap:28px;align-content:start}
+.more-wrap{display:flex;justify-content:center;margin-top:32px}
+
+.cov{display:block;position:relative;overflow:hidden;background:var(--blue);border-radius:4px}
+.cov svg{display:block;width:100%;height:100%;transition:transform .5s ease}
+a:hover>.cov svg,a:hover .cov svg{transform:scale(1.04)}
+.r169{aspect-ratio:16/9}.r43{aspect-ratio:4/3}.sq{aspect-ratio:1/1}
+.tag{display:inline-block;font-size:.78rem;font-weight:700;color:var(--link)}
+.tag.red{color:#fff;background:var(--red);padding:1px 8px;border-radius:3px}
+.meta{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:.8rem;color:var(--muted)}
+.card{display:grid;gap:10px;align-content:start;color:inherit;text-decoration:none}
+.card h3{font-size:1.1rem}
+.card p{color:var(--muted);font-size:.93rem;line-height:1.55}
+.card:hover h3,.row:hover h3,.lead:hover h2{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:14px;padding:16px 0;border-top:1px solid var(--line);color:inherit;text-decoration:none;align-items:start}
+.row h3{font-size:1rem;margin:2px 0 6px}
+.row:first-child{border-top:0;padding-top:0}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:36px}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr)}}
+.lead{display:grid;gap:14px;color:inherit;text-decoration:none;align-content:start}
+.lead h2{font:900 clamp(1.65rem,3.6vw,2.5rem)/1.18 var(--serif)}
+.lead p{font-size:1.05rem;color:var(--muted);max-width:60ch}
+
+/* trending */
+.trend{list-style:none;margin:0;padding:0}
+.trend li{border-top:1px solid var(--line)}
+.trend a{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;padding:13px 0;color:inherit;text-decoration:none}
+.trend .n{font:900 1.6rem/1 var(--serif);color:var(--link)}
+.trend b{display:block;font:700 .95rem/1.35 var(--serif)}
+.trend a:hover b{text-decoration:underline}
+.trend small{color:var(--muted);font-size:.78rem}
+.panel-box{border:1px solid var(--line);background:var(--surface);padding:20px;border-radius:4px}
+.panel-box h3{font-size:1.2rem;margin-bottom:6px}
+
+/* tabs */
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:26px;scrollbar-width:thin}
+.tabs button{padding:12px 18px;border:0;background:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--link);border-bottom-color:var(--btn)}
+
+/* opinion */
+.op-card{display:grid;gap:14px;background:var(--surface);border:1px solid var(--line);padding:22px;border-radius:4px;color:inherit;text-decoration:none;align-content:start}
+.op-card:hover h3{text-decoration:underline}
+.op-card h3{font-size:1.25rem}
+.who{display:flex;align-items:center;gap:12px}
+.who b{display:block;font-size:.92rem;line-height:1.3}
+.who small{color:var(--muted);font-size:.8rem}
+.av{flex:none;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-family:var(--sans)}
+
+/* videos */
+.vid{display:grid;gap:10px;color:inherit;text-decoration:none;text-align:start;background:none;border:0;padding:0;width:100%}
+.vid .cov{position:relative}
+.vid .play{position:absolute;inset:0;display:grid;place-items:center}
+.vid .play i{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center;color:var(--blue);box-shadow:0 6px 18px rgba(0,0,0,.3);transition:transform .15s}
+.vid:hover .play i{transform:scale(1.1)}
+.vid .play svg{width:22px;height:22px;margin-inline-start:3px}
+.vid .dur{position:absolute;inset-inline-end:10px;bottom:10px;background:rgba(0,0,0,.75);color:#fff;font-size:.75rem;padding:2px 7px;border-radius:3px;font-variant-numeric:tabular-nums}
+.vid h3{font-size:1.05rem}
+.vid:hover h3{text-decoration:underline}
+.vid p{color:var(--muted);font-size:.9rem}
+.player{position:relative;border-radius:6px;overflow:hidden;background:#000}
+.player .cov{border-radius:0}
+.player .big{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.18);border:0;color:#fff}
+.player .big i{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center;color:var(--blue)}
+.player .big svg{width:28px;height:28px}
+.player.playing .big{opacity:0}
+.player.playing .big:focus-visible{opacity:1}
+.pc{display:flex;align-items:center;gap:12px;margin-top:12px}
+.pc input[type=range]{flex:1;accent-color:var(--btn);padding:0;border:0;background:none}
+.pc time{font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:86px;text-align:end}
+.pc .icon-btn{border-color:var(--line);color:var(--ink)}
+.pc .icon-btn:hover{background:var(--tint)}
+
+/* carousel */
+.car{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:4px}
+.car::-webkit-scrollbar{display:none}
+.car .card{flex:0 0 min(80vw,300px);scroll-snap-align:start}
+.car-nav{display:flex;gap:8px}
+
+/* newsletter */
+.news{background:var(--blue);color:#fff;border-radius:6px;padding:clamp(28px,5vw,52px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:center}
+@media (max-width:820px){.news{grid-template-columns:minmax(0,1fr)}}
+.news h2{font:900 clamp(1.4rem,3vw,2rem)/1.2 var(--serif);color:#fff}
+.news p{opacity:.9;margin-top:8px}
+.nl-form{display:flex;gap:10px;flex-wrap:wrap}
+.nl-form input{flex:1 1 220px;min-width:0;height:46px;border:0;border-radius:4px;padding:0 14px;font:inherit;background:#fff;color:#111}
+.nl-form .btn{height:46px}
+.nl-msg{min-height:1.4em;margin-top:10px;font-size:.9rem}
+.news .nl-msg{color:#fff}
+.nl-msg.bad{color:#FFD0D0}
+
+/* section pages */
+.page-h{background:var(--tint);padding:44px 0 36px;border-bottom:1px solid var(--line)}
+.page-h h1{font:900 clamp(1.9rem,4.5vw,2.9rem)/1.1 var(--serif)}
+.page-h p{margin-top:10px;color:var(--muted);max-width:64ch}
+.crumbs{font-size:.85rem;color:var(--muted);margin-bottom:10px}
+.crumbs a{color:var(--muted)}
+.bar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:26px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font-size:.85rem;font-weight:600}
+.chip:hover{background:var(--tint)}
+.chip[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+select.sel,.field input,.field select,.field textarea{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);width:100%}
+select.sel{width:auto;padding:8px 12px}
+.empty{padding:44px 20px;text-align:center;border:1px dashed var(--line);border-radius:6px;color:var(--muted)}
+.empty h3{color:var(--ink);margin-bottom:6px}
+.srch{display:flex;gap:10px;margin-bottom:22px}
+.srch input{flex:1;min-width:0;height:48px;border:1px solid var(--line);border-radius:4px;padding:0 14px;font:inherit;background:var(--surface);color:var(--ink)}
+.srch .btn{height:48px}
+
+/* article */
+.art-cols{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:56px;padding:36px 0 56px}
+@media (max-width:1080px){.art-cols{grid-template-columns:minmax(0,1fr)}}
+.art h1{font:900 clamp(1.8rem,4.2vw,2.9rem)/1.15 var(--serif);margin:12px 0}
+.art .dek{font-size:1.2rem;color:var(--muted);line-height:1.55;margin-bottom:20px}
+.byline{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;padding:14px 0;border-block:1px solid var(--line);margin-bottom:22px}
+.byline .meta{font-size:.85rem}
+.fig{margin:0 0 28px}
+.fig figcaption{font-size:.82rem;color:var(--muted);margin-top:8px}
+.share{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0}
+.share .lbl{font-weight:600;font-size:.88rem;margin-inline-end:4px}
+.share a,.share button{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:1px solid var(--line);background:var(--surface);border-radius:18px;color:var(--ink);text-decoration:none;font-size:.85rem;font-weight:600}
+.share a:hover,.share button:hover{background:var(--tint)}
+.takeaways{background:var(--tint);border-inline-start:4px solid var(--btn);padding:18px 22px;border-radius:4px;margin-bottom:28px}
+.takeaways h2{font:700 1.05rem var(--serif);margin-bottom:8px}
+.takeaways ul{margin:0;padding-inline-start:20px}
+.takeaways li{margin:6px 0}
+.prose{font-size:1.0625rem;line-height:1.8;max-width:68ch}
+.prose p{margin:0 0 1.15em}
+.prose h2{font-size:1.45rem;margin:1.9em 0 .6em}
+.pq{margin:34px 0;padding:4px 0 4px 22px;border-inline-start:4px solid var(--btn);font:700 clamp(1.25rem,2.6vw,1.6rem)/1.4 var(--serif);color:var(--link)}
+.bio{display:flex;gap:16px;align-items:flex-start;border:1px solid var(--line);padding:20px;border-radius:4px;margin:38px 0;background:var(--surface)}
+.bio p{color:var(--muted);font-size:.92rem;margin-top:4px}
+.side-sticky{position:sticky;top:calc(72px + env(safe-area-inset-top,0px));display:grid;gap:30px;align-content:start}
+.cmt{margin-top:46px}
+.cmt h2{font-size:1.4rem;margin-bottom:16px}
+.cmt-item{padding:16px 0;border-top:1px solid var(--line)}
+.cmt-item b{font-size:.95rem}
+.cmt-item small{color:var(--muted);margin-inline-start:10px}
+.cmt-item p{margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}
+.nextbox{margin-top:40px;border-top:3px solid var(--btn);padding-top:16px}
+#prog{position:fixed;inset:env(safe-area-inset-top,0px) 0 auto;height:3px;z-index:95;background:var(--red);width:0}
+
+/* forms and static pages */
+.field{display:grid;gap:6px;margin-bottom:16px}
+.field label,.field legend{font-weight:600;font-size:.9rem}
+.field textarea{min-height:130px;resize:vertical}
+.field .hint{color:var(--muted);font-size:.82rem}
+.field .err{color:#C21F1F;font-size:.84rem;min-height:1em}
+:root[data-theme="dark"] .field .err,:root[data-theme="dark"] .nl-msg.bad{color:#FF9A9A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .field .err{color:#FF9A9A}}
+.checks{display:flex;flex-wrap:wrap;gap:8px 18px}
+.checks label{display:flex;gap:8px;align-items:center;font-weight:500}
+.page{max-width:860px;margin-inline:auto;padding-top:48px;padding-bottom:64px}
+.page h1{font:900 clamp(1.9rem,4.5vw,2.8rem)/1.15 var(--serif);margin-bottom:14px}
+.page h2{font-size:1.35rem;margin:34px 0 10px}
+.page p,.page li{color:var(--ink);margin-bottom:.9em;max-width:70ch}
+.page .lede{font-size:1.15rem;color:var(--muted)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px}
+@media (max-width:820px){.two{grid-template-columns:minmax(0,1fr)}}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px;margin:20px 0}
+.tile{border:1px solid var(--line);border-radius:4px;padding:18px;background:var(--surface)}
+.tile h3{font-size:1.05rem;margin-bottom:6px}
+.tile p{font-size:.9rem;color:var(--muted);margin:0}
+details.job{border:1px solid var(--line);border-radius:4px;background:var(--surface);margin-bottom:12px}
+details.job summary{padding:16px 18px;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;gap:12px;list-style:none}
+details.job summary::-webkit-details-marker{display:none}
+details.job summary small{color:var(--muted);font-weight:400}
+details.job[open] summary{border-bottom:1px solid var(--line)}
+details.job .jb{padding:16px 18px}
+.okbox{border:1px solid var(--btn);background:var(--tint);padding:22px;border-radius:6px}
+.okbox h3{margin-bottom:6px}
+
+/* footer */
+footer{background:var(--blue-d);color:#DCE6F8;margin-top:0}
+.ft{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:36px;padding-top:52px;padding-bottom:36px}
+@media (max-width:980px){.ft{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.ft{grid-template-columns:minmax(0,1fr)}}
+.ft h3{font:700 1rem var(--sans);color:#fff;margin-bottom:14px}
+.ft ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.ft a,.ft .lnk{color:#DCE6F8;text-decoration:none;font-size:.92rem;background:none;border:0;padding:0;text-align:start}
+.ft a:hover,.ft .lnk:hover{color:#fff;text-decoration:underline}
+.ft p{font-size:.92rem;line-height:1.65;margin-bottom:14px}
+.ft .logo{color:#fff}
+.ft .logo small{color:#B9C8E6}
+.soc{display:flex;gap:10px;margin-bottom:20px}
+.soc a{width:38px;height:38px;border:1px solid rgba(255,255,255,.3);border-radius:50%;display:grid;place-items:center;color:#fff}
+.soc a:hover{background:rgba(255,255,255,.16);text-decoration:none}
+.soc svg{width:18px;height:18px}
+.ft .nl-form input{height:42px}
+.ft .nl-form .btn{height:42px}
+.ft .nl-msg{color:#fff}
+.legal{border-top:1px solid rgba(255,255,255,.16);padding-top:20px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;font-size:.85rem}
+.legal ul{display:flex;flex-wrap:wrap;gap:8px 20px}
+
+/* overlays */
+.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.scrim{position:absolute;inset:0;background:rgba(5,12,30,.68)}
+.dlg{position:relative;background:var(--surface);color:var(--ink);width:min(560px,100%);max-height:calc(100% - 8px);overflow:auto;border-radius:8px;padding:30px;box-shadow:var(--shadow)}
+.modal.wide .dlg{width:min(880px,100%)}
+.modal.top{align-items:flex-start;padding-top:calc(7vh + env(safe-area-inset-top,0px))}
+.modal.top .dlg{width:min(720px,100%)}
+.dlg .x{position:absolute;top:10px;inset-inline-end:10px;width:36px;height:36px;border:0;background:transparent;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
+.dlg .x:hover{background:var(--tint)}
+.dlg h2{font-size:1.45rem;margin-bottom:6px;padding-inline-end:30px}
+.dlg .sub-t{color:var(--muted);margin-bottom:18px}
+.dlg pre{background:var(--tint);padding:14px;border-radius:4px;overflow:auto;max-height:46vh;font-size:.78rem;line-height:1.5;margin:14px 0}
+.res{list-style:none;margin:14px 0 0;padding:0}
+.res a{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:10px 6px;border-radius:4px;color:inherit;text-decoration:none;align-items:center}
+.res a:hover,.res a:focus-visible{background:var(--tint)}
+.res b{font:700 .95rem/1.35 var(--serif);display:block}
+.res small{color:var(--muted)}
+.cookie{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 28px rgba(0,0,0,.14);padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.cookie .in{max-width:1240px;margin:auto;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+.cookie p{font-size:.9rem;max-width:70ch}
+.cookie .acts{display:flex;gap:10px;flex-wrap:wrap}
+.totop{position:fixed;inset-inline-end:calc(16px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:70;width:46px;height:46px;border-radius:50%;border:0;background:var(--btn);color:#fff;display:grid;place-items:center;box-shadow:var(--shadow)}
+.totop svg{width:20px;height:20px}
+.cookie:not([hidden]) ~ .totop{display:none}
+.toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:120;background:#10213F;color:#fff;padding:12px 20px;border-radius:6px;font-size:.9rem;box-shadow:var(--shadow);max-width:calc(100vw - 32px);text-align:center}
+
+@media (max-width:560px){
+  .tb-date{display:none}
+  .tb-ctrl{width:100%;justify-content:space-between}
+  .dlg{padding:24px 18px}
+  .sec{padding:34px 0}
+  .row{grid-template-columns:92px minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .tk-view{overflow-x:auto}
+}
+
+</style>
+
+<div id="prog" aria-hidden="true"></div>
+<a class="sr-only" href="#app" onclick="document.getElementById('app').focus();return false">Skip to content</a>
+<header id="hdr"></header>
+<main id="app" tabindex="-1"><noscript><p style="padding:40px">Open Desk needs JavaScript to display stories.</p></noscript></main>
+<footer id="ftr"></footer>
+<div class="cookie" id="cookie" role="dialog" aria-label="Cookie preferences" hidden><div class="in"><p>We use essential cookies to remember your language and theme, and optional analytics cookies to learn which stories readers value. Read our <a href="#privacy">privacy policy</a>.</p><div class="acts"><button class="btn ghost sm" data-act="cookie-essential">Essential only</button><button class="btn sm" data-act="cookie-accept">Accept all</button></div></div></div>
+<button class="totop" id="toTop" data-act="to-top" aria-label="Back to top" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg></button>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="modal" id="modal" hidden><div class="scrim" data-act="close-modal"></div><div class="dlg" role="dialog" aria-modal="true" aria-label="Open Desk dialog"><div id="modalBody"></div></div></div>
+<script>
+/* ===== Open Desk content. Edit freely: add articles to ARTICLES, authors to AUTHORS. ===== */
+const SOCIAL={x:'https://x.com',facebook:'https://www.facebook.com',youtube:'https://www.youtube.com',instagram:'https://www.instagram.com',linkedin:'https://www.linkedin.com'}; // replace with your real profile URLs
+
+const AUTHORS={
+  amira:{name:'Amira Hassan',role:'World Correspondent',bio:'Amira covers diplomacy and international affairs, with a focus on how global decisions reach ordinary households.'},
+  daniel:{name:'Daniel Okafor',role:'Business Editor',bio:'Daniel writes about trade, markets and the companies shaping the global economy.'},
+  mei:{name:'Mei Lin Zhou',role:'Technology Reporter',bio:'Mei explains new technology in plain language and tests the claims behind it.'},
+  sofia:{name:'Dr. Sofia Ramirez',role:'Health Contributor',bio:'Sofia is a physician and writer who turns medical research into practical, balanced guidance.'},
+  kwame:{name:'Kwame Mensah',role:'Sports Writer',bio:'Kwame follows football and athletics across Africa, Europe and Asia.'},
+  priya:{name:'Priya Nair',role:'Science Correspondent',bio:'Priya reports on climate, energy and the science of how we live.'},
+  lucas:{name:'Lucas Ferreira',role:'Culture Writer',bio:'Lucas writes about food, music and the everyday traditions that connect communities.'},
+  hannah:{name:'Hannah Brooks',role:'Opinion Editor',bio:'Hannah edits the Opinion desk and commissions voices from every region.'},
+  tomas:{name:'Tomás Alvarez',role:'Travel Editor',bio:'Tomás has reported from more than sixty countries and favours slow, respectful travel.'},
+  aisha:{name:'Aisha Khan',role:'Education Reporter',bio:'Aisha covers schools, universities and the changing ways people learn.'},
+  omar:{name:'Omar Rahman',role:'Politics Analyst',bio:'Omar analyses elections, institutions and how citizens engage with public life.'}
+};
+
+const CATS={
+  world:{d:'Reporting and explainers from every continent.'},
+  politics:{d:'Elections, institutions and how public life works around the world.'},
+  business:{d:'Trade, markets, work and the companies shaping the global economy.'},
+  technology:{d:'The tools, ideas and debates changing how we live and work.'},
+  science:{d:'Discoveries, climate and the science behind the headlines.'},
+  health:{d:'Evidence-based guidance on wellbeing, medicine and public health.'},
+  sports:{d:'Football, cricket, athletics and the stories behind the scores.'},
+  culture:{d:'Food, music, art and the traditions that connect people.'},
+  opinion:{d:'Voices and arguments from writers around the world.'},
+  travel:{d:'Places worth the journey, and how to visit them well.'},
+  education:{d:'Schools, universities and the changing ways people learn.'}
+};
+const NAV_MAIN=['world','politics','business','technology','science','health','sports','culture','opinion'];
+const NAV_MORE=['travel','education'];
+const REGIONS=['Asia','Europe','Africa','Americas','Middle East','Oceania'];
+
+/* body blocks: string = paragraph, {h} = sub-heading, {q} = pull quote */
+const ARTICLES=[
+{id:'climate-talks',cat:'world',by:'amira',d:0,motif:'globe',pal:0,regions:['Asia','Europe','Africa','Americas','Middle East','Oceania'],ed:1,
+ title:`Global Leaders Gather as Climate Talks Enter Decisive Week`,
+ sub:`Negotiators face the hardest questions first: who pays, how fast, and who checks the numbers.`,
+ tk:[`The final week of talks is usually where money and timelines are settled.`,`Climate finance and adaptation matter as much as emission targets.`,`Verification rules draw as much debate as headline pledges.`],
+ body:[
+ `The final week of any major climate negotiation tends to follow the same pattern. The easy language is agreed early. The hard questions are saved for last, when delegations are tired, deadlines are close and every sentence in the draft text carries a price tag.`,
+ `This year is no different. Delegations from small island states, large emerging economies and wealthy industrial nations are working through the same short list of issues, and each group arrives with a different definition of what a fair outcome looks like.`,
+ {h:`Three questions that decide the outcome`},
+ `The first is money. Developing countries argue that cutting emissions and preparing for floods, droughts and storms costs far more than they can fund alone. They want clear, predictable finance from richer countries that have emitted the most over time. Donor governments respond that public budgets are limited and that private investment must fill part of the gap.`,
+ `The second is speed. Scientific assessments point to the need for steep cuts within this decade, yet national plans are shaped by domestic politics, energy prices and election calendars. Negotiators spend much of the week deciding how often countries should revisit their targets, and whether weaker plans should draw pressure from others.`,
+ {q:`Every pledge is only as strong as the rules for checking it.`},
+ `The third is verification. Countries want to know that promises made in a conference hall turn into measurable change at home. Reporting standards, independent review and shared accounting methods sound technical, but they are often where talks stall.`,
+ {h:`What to watch for`},
+ `Observers look for a few signals. A final text that names specific amounts and dates is usually stronger than one built on broad language. Side agreements between smaller groups of countries, on methane, forests or clean power, can move faster than the full negotiation. And the tone of closing speeches often shows whether delegations feel heard.`,
+ `For readers following from far away, the practical takeaway is simple. Headlines will announce either a breakthrough or a failure. The reality is usually somewhere in between, and the real test comes months later, when governments decide whether to turn the agreement into law and into budgets.`
+ ]},
+{id:'emerging-markets',cat:'business',by:'daniel',d:0,motif:'chart',pal:1,regions:['Asia','Africa','Americas','Middle East'],ed:1,analysis:1,
+ title:`How Emerging Markets Are Reshaping the Global Economy`,
+ sub:`Younger populations, digital payments and new trade routes are shifting where growth comes from.`,
+ tk:[`Many emerging economies have young, growing workforces and fast-rising consumer demand.`,`Mobile payments and digital platforms let businesses scale without traditional infrastructure.`,`Trade between emerging markets is growing, creating routes that bypass old hubs.`],
+ body:[
+ `For most of the last century, the story of the world economy was told from a handful of capitals. Decisions about prices, supply chains and investment flowed outward from a small group of wealthy countries. That picture is changing, and the change is easiest to see in the places where growth is now being made.`,
+ `Emerging markets, a broad label for economies in Asia, Africa, Latin America and the Middle East that are industrialising and urbanising quickly, now account for a large share of global output and an even larger share of new consumers. Their influence shows up in everything from commodity prices to the design of smartphones.`,
+ {h:`A young workforce and a growing middle class`},
+ `Demographics are a big part of the story. In many emerging economies the median age is far lower than in Europe, Japan or North America. A large working-age population can power manufacturing, services and domestic spending, provided there are enough jobs and enough investment in schools and health care.`,
+ `As incomes rise, households move from basic necessities to appliances, education, travel and financial services. Companies of all sizes are redesigning products and prices for these new customers, often starting in markets that were once treated as an afterthought.`,
+ {h:`Leapfrogging old infrastructure`},
+ `Technology has let some countries skip steps that older economies took decades to complete. Mobile money services allow people without bank accounts to send payments and save. Online marketplaces connect small producers to buyers far beyond their region. Solar power and batteries can bring electricity to communities long before a national grid arrives.`,
+ {q:`Growth increasingly begins where the old infrastructure never did.`},
+ {h:`New trade routes and new risks`},
+ `Trade between emerging economies, sometimes called South-South trade, has grown steadily, and shipping, finance and logistics firms are adjusting. Regional agreements are lowering tariffs, while ports and rail links are being upgraded to move goods faster.`,
+ `None of this comes without risk. Many emerging economies carry debt in foreign currencies, which becomes harder to repay when exchange rates move against them. Commodity dependence can make budgets volatile, and rapid urban growth strains housing, water and transport.`,
+ {h:`What it means for everyone else`},
+ `For businesses and households in wealthier countries, the shift matters in practical ways: where goods are made, which companies compete for customers, and how interest rates and currencies move. The most useful way to read the headlines is to look past any single country and watch the patterns: younger populations, faster adoption of digital tools, and a steady widening of the list of places where the next big company can start.`
+ ]},
+{id:'ai-daily-life',cat:'technology',by:'mei',d:1,motif:'chip',pal:2,regions:['Asia','Europe','Americas','Africa'],ed:1,
+ title:`AI in 2026: Seven Ways It Is Quietly Changing Daily Life`,
+ sub:`Most of the change is not dramatic. It is happening inside the small tools people already use.`,
+ tk:[`The biggest effects of AI are in everyday tools, not headline-grabbing robots.`,`Translation, accessibility and tutoring help people who were once left out.`,`Accuracy and privacy still need human checks and clear rules.`],
+ body:[
+ `When people picture artificial intelligence, they often imagine robots or dramatic breakthroughs. In practice, the most noticeable change has been quieter. AI features are being built into phones, browsers, offices and clinics, and many people use them without thinking about it. Here are seven everyday areas where the shift is already visible.`,
+ {h:`1. Translation that keeps up`},
+ `Real-time translation of text, speech and signs now works well enough for a conversation with a shopkeeper or a quick read of a foreign news site. It is not perfect, and nuance can get lost, but it has made travel, study and cross-border work easier for people who do not share a language.`,
+ {h:`2. Better accessibility`},
+ `Automatic captions, image descriptions and voice control are opening apps and video to people who are deaf, blind or have limited mobility. For many users these are not conveniences. They are the difference between taking part and being shut out.`,
+ {h:`3. Study help on demand`},
+ `Students can ask for a concept to be explained another way, practise a language, or check their reasoning at any hour. Used well, this works like a patient tutor. Used badly, it becomes a shortcut that replaces learning.`,
+ {h:`4. Faster paperwork`},
+ `Hospitals, banks and government offices use AI tools to sort forms, summarise records and answer routine questions. The goal is to give staff more time for the cases that need a person.`,
+ {h:`5. Smarter navigation and energy use`},
+ `Maps predict traffic and suggest routes, while smart thermostats and power grids use forecasts to cut waste. Small efficiencies add up across millions of homes and journeys.`,
+ {h:`6. Tools for small businesses`},
+ `A shop owner can now draft product descriptions, answer customer messages in several languages and keep track of orders with software that once needed a dedicated team.`,
+ {h:`7. A new need to check what is real`},
+ `The same technology that helps can also produce convincing fake images, audio and text. Checking sources, looking for original reporting and being cautious with viral content have become part of everyday media literacy.`,
+ {q:`The technology works best as an assistant. The important choices still belong to people.`},
+ {h:`The honest limits`},
+ `AI systems can be confidently wrong, can reflect biases in their training data, and often depend on large amounts of personal information. Sensible habits help: verify important facts, avoid sharing sensitive details with tools you do not trust, and keep a person in charge of decisions that affect health, money or safety.`
+ ]},
+{id:'sleep-science',cat:'health',by:'sofia',d:1,motif:'moon',pal:3,regions:['Europe','Americas','Asia','Oceania'],ed:1,
+ title:`Sleep Science: Why Millions Are Rethinking Their Nightly Routine`,
+ sub:`Researchers keep finding that how we sleep shapes mood, memory and long-term health.`,
+ tk:[`Most adults do best with roughly seven to nine hours of sleep.`,`Regular timing, morning light and a calm evening matter as much as total hours.`,`Persistent sleep problems deserve a conversation with a health professional.`],
+ body:[
+ `Sleep used to be treated as the part of the day you could trade for something more productive. A growing body of research points the other way. Sleep is when the brain sorts memories, the body repairs tissue and the hormones that regulate appetite and mood are rebalanced. Cutting it short has costs that build quietly.`,
+ {h:`How much is enough?`},
+ `Health agencies generally suggest that most adults need about seven to nine hours a night, though individual needs vary. Teenagers and children need more. What matters is not only the number but whether you wake feeling rested and can stay alert during the day.`,
+ {h:`Habits that make a difference`},
+ `Sleep specialists tend to give similar advice, and most of it is about rhythm rather than gadgets. Keep a steady schedule: going to bed and waking at similar times, even on weekends, helps the body clock settle. Get daylight in the morning, because bright light early in the day makes it easier to feel sleepy at night. Dim the evening, since lower lights and fewer screens in the hour before bed help the mind wind down.`,
+ {q:`Consistency is the cheapest sleep aid there is.`},
+ `Watch caffeine and alcohol. Caffeine can linger in the body for many hours, and alcohol may make it easier to fall asleep while making sleep lighter and more broken. Keep the bedroom cool, dark and quiet, and try to reserve the bed for sleep.`,
+ {h:`Why so many people are paying attention now`},
+ `Wearable devices and sleep-tracking apps have made nightly patterns visible to millions of people for the first time. That can be motivating, but it can also create anxiety. Specialists caution that consumer trackers give estimates, and that worrying about a score can itself disturb sleep.`,
+ `Shift work, long commutes, caregiving and late-night work have also pushed many people to rethink how they structure their days. Some employers and schools are experimenting with later start times and flexible schedules.`,
+ {h:`When to seek help`},
+ `Occasional bad nights are normal. If you regularly struggle to fall asleep, wake often, snore loudly, stop breathing during sleep, or feel exhausted despite spending enough time in bed, speak with a doctor. Conditions such as insomnia and sleep apnoea are common and treatable.`,
+ `This article is general information, not medical advice.`
+ ]},
+{id:'football-rise',cat:'sports',by:'kwame',d:2,motif:'ball',pal:4,regions:['Asia','Africa','Europe','Middle East'],ed:1,
+ title:`The Rise of Football in Asia and Africa: A New Global Balance`,
+ sub:`Better academies, bigger leagues and a larger World Cup are widening the sport's map.`,
+ tk:[`Investment in academies and leagues is producing more world-class players outside Europe and South America.`,`An expanded World Cup format gives Asian and African teams more places.`,`Diaspora talent and global broadcasting keep pulling the sport's centre of gravity outward.`],
+ body:[
+ `For decades, the football world map had a familiar shape. The sport's biggest honours were shared between Europe and South America, and players from elsewhere often had to leave home to be noticed. That map is being redrawn.`,
+ `Across Asia and Africa, new academies, stronger domestic leagues and better coaching are producing players who compete confidently at the highest level. National teams once seen as underdogs now regularly test the established powers, and surprise results have become part of every major tournament.`,
+ {h:`Investment from the grassroots up`},
+ `Clubs and federations have put money into youth development, from community pitches to full-time academies. Better nutrition, sports science and early exposure to tactical coaching mean that talented teenagers arrive at professional level far better prepared than earlier generations.`,
+ `Domestic leagues have also grown in ambition. Higher wages, improved stadiums and wider television coverage help keep good players at home longer and give young fans local heroes to follow.`,
+ {h:`A bigger stage`},
+ `The expansion of the World Cup to more teams has given national sides from Asia and Africa additional places at the tournament, and with them more chances to build experience against top opponents. Continental competitions have grown in profile as well, drawing larger crowds and broadcast audiences.`,
+ {q:`The next great player could come from a town most fans have never heard of.`},
+ {h:`Players without borders`},
+ `Diaspora talent is another factor. Many players born or raised in Europe choose to represent the countries of their parents or grandparents, bringing top-level training to national teams. At the same time, scouts now work far more widely, and a strong performance in a regional tournament can be watched live by fans and clubs around the world.`,
+ {h:`Challenges that remain`},
+ `Progress is uneven. Some federations still struggle with funding, governance and travel costs. Pitches and facilities outside major cities can be poor, and young players often depend on a small number of opportunities. Fans and journalists also point to the need for fairer transfer systems, so that the clubs that develop talent share in its value.`,
+ `Even so, the direction is clear. Football's centre of gravity is spreading outward, and the sport is richer for it. The next decade is likely to bring more varied styles, more new names and a World Cup picture far less predictable than the one fans grew up with.`
+ ]},
+{id:'sustainable-cities',cat:'science',by:'priya',d:2,motif:'city',pal:2,regions:['Asia','Europe','Americas','Oceania','Middle East'],ed:1,
+ title:`Inside the Race to Build the World's Most Sustainable Cities`,
+ sub:`From green roofs to smart grids, planners are testing how cities can grow without overheating the planet.`,
+ tk:[`Cities hold most of the world's people and a large share of its emissions, so they also hold many of the solutions.`,`Buildings, transport and energy are the three biggest levers.`,`The most successful projects involve residents, not just engineers.`],
+ body:[
+ `More than half of the world's people now live in cities, and that share keeps rising. Cities use a great deal of energy, concentrate heat and generate waste, which makes them a large part of the climate problem. They are also where many of the practical answers are being tested first.`,
+ {h:`Buildings: the quiet giant`},
+ `Heating, cooling and lighting buildings accounts for a big portion of a city's energy use. Better insulation, efficient heat pumps and smarter ventilation can cut that demand sharply. Some cities now require new buildings to meet strict efficiency standards, and offer grants to help owners retrofit older ones.`,
+ {h:`Moving people, not just cars`},
+ `Transport is the second lever. Cities that make walking, cycling and public transport safe and convenient give residents real alternatives to driving. Electric buses, tram lines and protected bike lanes are common ingredients, but the biggest gains often come from planning: placing homes, jobs and shops close together so that fewer long trips are needed.`,
+ {q:`The most sustainable journey is the one a person never needs to make.`},
+ {h:`Cooling the city down`},
+ `Concrete and asphalt soak up heat, creating urban heat islands that can make a city several degrees warmer than the countryside around it. Planners are answering with street trees, parks, reflective roofs and green walls. Some cities are also redesigning surfaces to behave like sponges, absorbing heavy rain into soil and storage instead of letting it flood the streets.`,
+ {h:`Cleaner power, smarter grids`},
+ `Rooftop solar, district heating networks and large batteries are changing how electricity is produced and shared. Smart grids use data to balance supply and demand, shifting use to the times when clean power is plentiful.`,
+ {h:`The human side`},
+ `Technology alone does not make a city sustainable. Projects succeed when residents help shape them, when benefits reach low-income neighbourhoods and when housing stays affordable. A green district that only the wealthy can afford solves little.`,
+ `The race is far from over, and no city has all the answers. What is encouraging is how quickly ideas now travel, as planners in one region adapt what worked in another and publish their results for others to test.`
+ ]},
+{id:'street-food',cat:'culture',by:'lucas',d:3,motif:'bowl',pal:0,regions:['Asia','Americas','Middle East','Africa','Europe'],ed:1,
+ title:`Why Street Food Has Become the World's Favorite Travel Story`,
+ sub:`Affordable, fast and deeply local, a plate eaten on the pavement often says more about a place than any museum.`,
+ tk:[`Street food is affordable, social and rooted in local identity.`,`It supports millions of small vendors, many of them family businesses.`,`A few simple habits make eating on the street safer and more enjoyable.`],
+ body:[
+ `Ask frequent travellers about their best memory from a trip and the answer is often a meal eaten standing up. Tacos from a late-night cart in Mexico City, grilled suya in a Nigerian evening market, chaat and kebabs in the old lanes of Lahore, noodles ladled out in Bangkok: these are the experiences people describe long after they have forgotten the hotel.`,
+ {h:`Food that belongs to a place`},
+ `Street food grew up around the needs of working people. It had to be quick, filling and cheap, so cooks built menus around local ingredients and techniques that suited a single burner or a hot griddle. The result is a kind of living archive, with recipes handed down through families and adjusted to the tastes of each neighbourhood.`,
+ `It is also social. Eating at a stall usually means sharing a bench or a counter, watching the cook work and chatting with strangers. For visitors, that closeness is often the most direct way to meet a city.`,
+ {q:`A plate on the pavement often says more about a place than a museum.`},
+ {h:`An economy on wheels`},
+ `For millions of people, street vending is a livelihood. Many stalls are small family businesses, and the income supports households and neighbourhoods. Governments and cities have a mixed record in dealing with vendors. Some offer licences, training and designated food zones, while others restrict or remove stalls, which can threaten the people who depend on them.`,
+ `Social media has added another layer. A viral video can turn an unknown stall into a destination overnight. That can bring welcome income, but also long queues and rising prices that push out local regulars.`,
+ {h:`Eating well on the street`},
+ `Most travellers eat street food without trouble, and a few habits help. Choose busy stalls where food turns over quickly, because a crowd usually means freshness. Prefer food that is cooked to order and served hot. Look for clean utensils and covered ingredients, and be careful with raw items if your stomach is not used to the local water. If you have allergies, learn how to explain them in the local language before you order.`,
+ {h:`Travelling with respect`},
+ `Pay fairly, do not haggle over tiny amounts, and ask before taking photos of people at work. Try the dish the locals are eating rather than the one in the guidebook. The best street food stories usually begin with a simple question: what is the thing you would eat here?`
+ ]},
+{id:'independent-journalism',cat:'opinion',by:'hannah',d:3,motif:'quote',pal:1,regions:['Europe','Americas','Africa','Asia','Oceania','Middle East'],ed:1,analysis:0,
+ title:`Local Voices, Global Stories: Why Independent Journalism Matters`,
+ sub:`When reporting comes from the communities it describes, readers everywhere get a clearer picture.`,
+ tk:[`Local reporters notice stories that outside media often miss.`,`Independent outlets depend on reader trust and sustainable funding.`,`Readers can strengthen good journalism by how they choose, check and share news.`],
+ body:[
+ `Every large news story begins somewhere small: a town meeting, a clinic with no medicine, a river that stopped flowing. Someone has to be there to notice, and more often than not that someone is a local reporter who knows the streets, the language and the history behind the facts.`,
+ `That is why independent journalism matters, and why its health should concern readers far beyond any single country. When local reporting disappears, the loss is not only local. International coverage depends on it, and so do the officials, businesses and institutions that need someone watching them.`,
+ {h:`What local knowledge adds`},
+ `A reporter from the community brings context that a visiting correspondent cannot easily acquire. They know which sources are reliable, how a rumour began and what a policy will mean on an ordinary Tuesday. They are also accountable in a way outsiders are not, because the people they write about are their neighbours.`,
+ {q:`A newsroom that answers to its readers answers to the truth more often.`},
+ {h:`The funding problem`},
+ `Independence has a price. Advertising revenue has shifted to a few large platforms, and many small outlets struggle to pay reporters a fair wage. Some turn to reader subscriptions and memberships. Others rely on grants, which can help but need careful rules to protect editorial freedom. In some places, journalists also face legal pressure, harassment or physical danger for doing their jobs.`,
+ {h:`What readers can do`},
+ `Readers are not powerless. A few habits make a real difference. Read beyond the headline and check who is reporting and how they know what they claim. Compare how different outlets cover the same event. Pay for journalism you value, even a small amount. Share responsibly, because a false story that travels fast can undo days of careful work.`,
+ `Open Desk is built on a simple belief: that everyone, wherever they live, deserves access to accurate information and the chance to be heard. Good journalism makes that possible. It deserves our attention, our scrutiny and, when it earns it, our support.`
+ ]},
+{id:'hidden-destinations',cat:'travel',by:'tomas',d:4,motif:'pin',pal:3,regions:['Europe','Asia','Africa','Americas','Middle East','Oceania'],ed:1,
+ title:`10 Underrated Destinations Travelers Are Talking About This Year`,
+ sub:`From Alpine lakes to Karakoram valleys, ten places that reward visitors who look beyond the usual list.`,
+ tk:[`Lesser-known destinations often offer better value and fewer crowds.`,`Check entry rules, seasons and safety advisories before you book.`,`Staying with local hosts and eating at local places keeps tourism money in the community.`],
+ body:[
+ `Every year the same handful of cities and beaches fill up with visitors. Meanwhile, plenty of places with striking scenery, welcoming people and rich history stay quiet. Here are ten worth considering, spread across six regions.`,
+ {h:`1. Slovenia`},
+ `A compact country with a lot packed in: the riverside old town of Ljubljana, the glacial waters of Lake Bled, Alpine hiking and limestone caves, all easy to reach by train or car.`,
+ {h:`2. Oman`},
+ `Known for hospitality, Oman offers Muscat's coastline, old forts, desert camps and wadis, the seasonal valleys where freshwater pools gather between rocky walls.`,
+ {h:`3. Uzbekistan`},
+ `The blue-tiled Registan in Samarkand and the old Silk Road cities of Bukhara and Khiva make this one of the great historic journeys, with fast trains linking the main cities.`,
+ {h:`4. Georgia`},
+ `Tbilisi's old town, hill villages in the Caucasus and one of the world's oldest wine traditions make Georgia a rewarding mix of culture, mountains and food.`,
+ {h:`5. The Azores, Portugal`},
+ `Green volcanic islands in the middle of the Atlantic, with crater lakes, hot springs and some of the best whale watching in Europe.`,
+ {h:`6. Rwanda`},
+ `Trekking to see mountain gorillas in Volcanoes National Park is the highlight, and the capital Kigali is known for being clean and welcoming. Book gorilla permits well ahead.`,
+ {h:`7. Albania`},
+ `A coastline on the Adriatic and Ionian seas, the Ottoman-era hill town of Berat and good value for money draw a growing number of visitors.`,
+ {h:`8. Colombia's Coffee Region`},
+ `Rolling green hills, working coffee farms and the Cocora Valley, home to some of the tallest palm trees on Earth, make for slow and scenic days.`,
+ {h:`9. Hunza Valley, Pakistan`},
+ `Set beneath Karakoram peaks along the Karakoram Highway, Hunza is known for the historic Baltit and Altit forts, terraced fields and spring apricot blossom. Check road and weather conditions before you travel.`,
+ {h:`10. Tasmania, Australia`},
+ `Wild national parks such as Cradle Mountain, a strong food and wine scene and the art museum in Hobart give this island state an appeal far beyond its size.`,
+ {h:`Before you go`},
+ `Check visa rules, seasonal weather and your government's travel advice for each destination. Where you can, choose local guides and family-run places to stay, so that the benefits of your trip reach the community you are visiting.`
+ ]},
+{id:'online-learning',cat:'education',by:'aisha',d:4,motif:'book',pal:4,regions:['Asia','Africa','Americas','Europe','Middle East','Oceania'],ed:1,
+ title:`Online Learning Goes Global: How Students Everywhere Are Catching Up`,
+ sub:`Cheaper data, mobile-first courses and offline tools are opening classrooms to people far from any campus.`,
+ tk:[`Mobile phones are now the main classroom for many learners.`,`Offline downloads and low-bandwidth design help students with weak connections.`,`Online study works best when combined with human support and clear goals.`],
+ body:[
+ `Not long ago, a good education often depended on where you were born. A strong school, a university seat or a skilled teacher might be hours away, or simply out of reach. Online learning has not erased that gap, but it has narrowed it in ways that would have seemed unlikely a decade ago.`,
+ {h:`The phone as a classroom`},
+ `For many learners, a smartphone is the only computer they own. Course providers and schools have responded with mobile-first lessons, short video segments and text-based material that loads quickly. Students can study on a bus ride, between shifts or in the evening after family duties are done.`,
+ `Offline features matter too. Learners can download a lesson while on a strong connection and study it later without using data, which is a lifeline in areas where connectivity is patchy or expensive.`,
+ {q:`Access is not the same as learning, but without access nothing else is possible.`},
+ {h:`Learning in your own language`},
+ `Translation and captioning tools are helping lessons travel across languages. A student in one country can follow a lecture recorded in another, with subtitles and glossaries to help. Local teachers are also publishing their own courses, giving learners material that reflects their culture, exams and curriculum.`,
+ {h:`Skills and credentials`},
+ `Short courses, certificates and project-based programmes let people gain job-ready skills without years of full-time study. Employers increasingly look at what candidates can demonstrate rather than only where they studied, although recognition still varies between countries and sectors.`,
+ {h:`What still holds students back`},
+ `Challenges remain. Electricity and internet access are uneven, and many families cannot afford a personal device. Completion rates in self-paced courses are often low, because studying alone is hard. Teachers, mentors and study groups make a large difference, which is why many programmes now add community support or local learning hubs.`,
+ {h:`Making it work`},
+ `For learners, a few simple choices help: set a regular time, pick one clear goal, find a study partner and use free trial periods before paying. For governments and schools, the priority is to treat online tools as a partner to teachers rather than a replacement, and to invest in the connectivity that makes them usable for everyone.`
+ ]},
+{id:'voter-information',cat:'politics',by:'omar',d:5,motif:'vote',pal:1,regions:['Asia','Europe','Africa','Americas','Middle East','Oceania'],analysis:1,
+ title:`How Voters Around the World Are Getting Their Information`,
+ sub:`Television, messaging apps and short video now compete for attention, and each brings its own strengths and risks.`,
+ tk:[`People now get political information from many sources at once, not just newspapers and television.`,`Messaging apps and short video spread information quickly, which helps and harms.`,`Checking the source, the date and the original claim is the best defence against misinformation.`],
+ body:[
+ `Ask a voter today where they learn about politics and the answer will often be a list. A television bulletin at breakfast, a family group chat at lunch, a short video during a commute, perhaps a newsletter in the evening. The mix differs from country to country and from one age group to another, but the trend is the same everywhere: more sources, faster.`,
+ {h:`Many channels, different habits`},
+ `In some countries television and radio remain the main sources, especially for older and rural audiences. In others, smartphones have become the main gateway, with messaging apps used to share articles, voice notes and images within families and communities. Younger voters in particular often meet news through short video, where a clip of a few seconds can reach millions.`,
+ `Local newspapers, community radio and independent websites continue to matter, particularly for local issues such as schools, roads and public services that national outlets rarely cover.`,
+ {h:`Speed brings benefits and risks`},
+ `Fast, personal channels have clear advantages. They lower the cost of reaching an audience, give citizens a way to ask questions directly and help communities organise. They also make it easier for rumours, edited clips and misleading images to spread before anyone has checked them.`,
+ {q:`The first version of a story is rarely the whole story.`},
+ {h:`How election bodies and newsrooms are responding`},
+ `Electoral commissions in many countries now publish voting information in several formats and languages, and some run dedicated channels to answer common questions. Newsrooms and independent fact-checkers publish corrections and explainers, and some partner with platforms to label disputed claims. Researchers continue to study what works, and the findings are mixed, which is a reason for modest expectations.`,
+ {h:`Simple habits that help`},
+ `Voters can protect themselves with a few steps that apply to any source. Check who published a claim and whether they name their sources. Look at the date, since old stories often resurface as if they were new. Search for the original statement or document rather than relying on a screenshot. Compare coverage from outlets with different perspectives, and pause before sharing something that provokes a strong emotional reaction.`,
+ `Informed participation does not require following every headline. It requires a handful of reliable sources and a willingness to check before passing something on.`
+ ]},
+
+/* ---- Briefs: shorter pieces that fill the category rows ---- */
+{id:'remote-work-cities',cat:'business',by:'daniel',d:2,motif:'city',pal:3,regions:['Europe','Americas','Asia'],brief:1,
+ title:`Why Remote Work Keeps Reshaping City Centres`,sub:`Offices, cafes and transport are all adjusting to a more flexible week.`,
+ tk:[`Hybrid schedules have changed foot traffic in business districts.`,`Some cities are converting empty offices into homes.`,`Small businesses near offices feel the shift most.`],
+ body:[`Many companies now ask staff to come in only a few days a week. That has changed the rhythm of city centres, with busy midweek peaks and quieter Mondays and Fridays. Cafes, restaurants and transport operators have adjusted opening hours and timetables to match.`,`City planners are testing new ideas, from converting underused office blocks into apartments to creating neighbourhood work hubs closer to where people live. The long-term effect on property values and local shops is still being worked out.`]},
+{id:'small-exporters',cat:'business',by:'daniel',d:5,motif:'chart',pal:0,regions:['Asia','Africa','Americas'],brief:1,
+ title:`Small Exporters Are Going Global Through Online Marketplaces`,sub:`A craft workshop or a spice farm can now find buyers in dozens of countries.`,
+ tk:[`Online marketplaces lower the cost of finding foreign customers.`,`Shipping, payments and customs are still the hardest steps.`,`Sellers who tell their story well tend to build repeat buyers.`],
+ body:[`Online marketplaces and digital payments let small producers reach customers far beyond their home market. Weavers, tea growers and furniture makers are selling directly abroad, often with only a few employees.`,`The hard parts remain practical ones: reliable shipping, customs paperwork and currency costs. Trade agencies and local cooperatives increasingly offer training to help sellers handle them.`]},
+{id:'strong-currency',cat:'business',by:'daniel',d:7,motif:'chart',pal:2,regions:['Americas','Europe','Asia','Middle East'],brief:1,
+ title:`What a Strong Currency Means for Everyday Prices`,sub:`Exchange rates reach shopping baskets, holiday budgets and company profits.`,
+ tk:[`A stronger currency makes imports cheaper and exports pricier.`,`Travellers gain buying power abroad.`,`Exporters can lose competitiveness.`],
+ body:[`When a country's currency gains value, imported goods such as fuel, electronics and some foods often become cheaper for consumers. Holidays abroad also cost less, because each unit of home currency buys more.`,`The other side is that exporters find their products more expensive for foreign buyers, which can squeeze sales and jobs. Central banks watch exchange rates closely for this reason.`]},
+
+{id:'passkeys',cat:'technology',by:'mei',d:3,motif:'chip',pal:4,regions:['Americas','Europe','Asia'],brief:1,
+ title:`How Passkeys Are Replacing Passwords`,sub:`A sign-in method that is harder to steal and easier to use.`,
+ tk:[`Passkeys use your device and a biometric or PIN instead of a typed password.`,`They resist phishing because there is no secret to hand over.`,`Keep a recovery method in case you lose a device.`],
+ body:[`A passkey lets you sign in with a fingerprint, face scan or device PIN. The secret never leaves your device, so a fake website cannot trick you into typing it.`,`Major platforms now support them. If you try one, set up a recovery option and keep a backup sign-in method until you are comfortable.`]},
+{id:'battery-recycling',cat:'technology',by:'mei',d:6,motif:'chip',pal:2,regions:['Asia','Europe','Americas'],brief:1,
+ title:`Why Battery Recycling Is Becoming a Big Business`,sub:`Old phone and car batteries contain metals worth recovering.`,
+ tk:[`Batteries contain valuable metals such as lithium, cobalt and nickel.`,`Recycling reduces the need for new mining.`,`Collection and safe handling are the main hurdles.`],
+ body:[`As electric vehicles and portable electronics spread, so does the number of ageing batteries. They contain metals that are costly and environmentally heavy to mine, which makes recovering them attractive.`,`Companies are building plants that shred and chemically process used cells. The biggest challenges are collecting batteries safely and designing them so they are easier to take apart.`]},
+{id:'satellite-internet',cat:'technology',by:'mei',d:8,motif:'globe',pal:1,regions:['Africa','Asia','Americas','Oceania'],brief:1,
+ title:`Satellite Internet Is Reaching Remote Villages`,sub:`Networks in low orbit are bringing connections where cables never reached.`,
+ tk:[`Low-orbit satellites offer faster links than older satellite services.`,`Equipment and monthly costs still limit access.`,`Schools and clinics are among the first users.`],
+ body:[`Constellations of satellites in low orbit can beam internet to places with no cables or towers, from mountain villages to remote islands. Speeds and delays are much better than older satellite systems.`,`Cost remains the main barrier for households. Community schemes, where a single connection serves a school or health post, are often the first step.`]},
+
+{id:'womens-football-crowds',cat:'sports',by:'kwame',d:3,motif:'ball',pal:0,regions:['Europe','Americas','Africa','Oceania','Asia'],brief:1,
+ title:`Women's Football Is Filling Stadiums Worldwide`,sub:`Bigger crowds and broadcasts are changing how clubs plan.`,
+ tk:[`Attendances and television audiences for women's football have grown in many countries.`,`Clubs are investing in academies and facilities.`,`Pay and coverage gaps are narrowing but remain.`],
+ body:[`Matches that once played in near-empty grounds now regularly draw large crowds, and broadcasters are scheduling games in prime slots. Clubs and federations are building youth pathways so that girls can train from a young age.`,`Players and supporters say that fair pay, strong coverage and safe facilities are the next priorities.`]},
+{id:'cricket-short-formats',cat:'sports',by:'kwame',d:6,motif:'ball',pal:3,regions:['Asia','Oceania','Europe','Africa'],brief:1,
+ title:`Why Cricket's Shorter Formats Keep Winning New Fans`,sub:`Three-hour matches suit busy lives and new audiences.`,
+ tk:[`Shorter formats fit a single evening.`,`Franchise leagues connect fans with global players.`,`Traditionalists still prize the long game.`],
+ body:[`Short-form cricket packs a full contest into about three hours, with big hitting and tight finishes that suit television and stadium evenings alike. Franchise leagues in several countries have drawn new fans, including many who never followed the longer game.`,`Many players and supporters still hold up the multi-day format as the sport's deepest test, and boards are working to keep both alive.`]},
+{id:'marathon-pacing',cat:'sports',by:'kwame',d:9,motif:'ball',pal:2,regions:['Africa','Europe','Americas','Asia'],brief:1,
+ title:`The Quiet Science of Marathon Pacing`,sub:`Starting slower than feels necessary is the oldest trick in distance running.`,
+ tk:[`Even pacing usually beats a fast start.`,`Fuel and hydration plans matter from the first hour.`,`Training in the final weeks should taper, not escalate.`],
+ body:[`Coaches repeat the same advice: run the first half of a marathon a little slower than you think you should. Energy stores run low in the final miles, and runners who start too fast often pay for it.`,`Practising your drink and fuel plan in training, and easing off mileage in the last two weeks, help most runners arrive fresh.`]},
+
+{id:'walking-after-meals',cat:'health',by:'sofia',d:3,motif:'moon',pal:2,regions:['Europe','Asia','Americas'],brief:1,
+ title:`Walking After Meals: A Small Habit With Real Benefits`,sub:`A short stroll can help digestion and steady blood sugar.`,
+ tk:[`Ten to fifteen minutes of gentle walking is enough to start.`,`It can help with digestion and energy.`,`People with medical conditions should follow their doctor's advice.`],
+ body:[`Studies suggest that a short walk after eating can help the body manage blood sugar and may ease digestion. It does not need to be brisk: a relaxed ten to fifteen minutes is a good start.`,`This is general information. If you have diabetes or another condition, ask your doctor what is right for you.`]},
+{id:'vaccine-updates',cat:'health',by:'sofia',d:6,motif:'moon',pal:0,regions:['Africa','Asia','Europe','Americas','Middle East'],brief:1,
+ title:`Why Some Vaccines Need Regular Updates`,sub:`Viruses change, and protection sometimes has to keep up.`,
+ tk:[`Some viruses mutate quickly, so vaccines are updated to match.`,`Others, like measles, need few changes.`,`Your health service sets the schedule.`],
+ body:[`Influenza viruses change often, so the vaccine is adjusted each year to match the strains expected to spread. Other vaccines, such as those for measles, protect for many years with few changes.`,`Health authorities publish schedules based on the latest evidence. A pharmacist or doctor can tell you which ones apply to you.`]},
+{id:'nutrition-labels',cat:'health',by:'sofia',d:8,motif:'bowl',pal:4,regions:['Americas','Europe','Oceania','Asia'],brief:1,
+ title:`How to Read a Nutrition Label in Under a Minute`,sub:`Three checks cover most of what you need to know.`,
+ tk:[`Check the serving size first.`,`Compare sugar, salt and fibre per 100 grams.`,`The ingredient list is ordered by weight.`],
+ body:[`Start with the serving size, because every other number on the label is based on it. Then compare similar products using the per-100-gram column, looking at sugar, salt and fibre.`,`Ingredients are listed from largest to smallest by weight, so the first few items tell you what a product is mostly made of.`]}
+];
+
+const VIDEOS=[
+ {id:'v-cargo',title:`60 Seconds: How a Cargo Ship Crosses the World`,dur:72,motif:'globe',pal:0,desc:`From a port crane to a warehouse shelf, the route behind everyday goods.`},
+ {id:'v-time',title:`Explained: Why We Have Time Zones`,dur:125,motif:'globe',pal:1,desc:`Railways, noon and a very practical idea.`},
+ {id:'v-food',title:`A Short Tour of the World's Street Food`,dur:198,motif:'bowl',pal:2,desc:`Six cities, six plates, one idea: eat where the locals eat.`},
+ {id:'v-solar',title:`How Solar Panels Turn Light Into Power`,dur:160,motif:'chart',pal:3,desc:`A simple look at the physics, with no equations.`},
+ {id:'v-sleep',title:`Sleep in Three Simple Steps`,dur:105,motif:'moon',pal:4,desc:`Light, timing and a calm evening, explained in under two minutes.`},
+ {id:'v-academy',title:`Inside a Football Academy`,dur:182,motif:'ball',pal:0,desc:`A day with young players, from first whistle to final drill.`}
+];
+
+const JOBS=[
+ {id:'j1',t:'Senior Editor, World',loc:'Remote, any time zone',d:`Lead our international desk, commission reporters in every region and set standards for accuracy and fairness. You have at least five years in a newsroom and experience editing across languages.`},
+ {id:'j2',t:'Data Journalist',loc:'Remote, Europe or Asia time zones',d:`Find stories in public data and turn them into clear charts and explainers. Skills in spreadsheets, SQL or Python and a strong sense of visual storytelling are needed.`},
+ {id:'j3',t:'Audience Editor',loc:'Lahore or remote',d:`Grow our readership across newsletters and social channels while protecting reader trust. You will test headlines, formats and languages and report on what works.`},
+ {id:'j4',t:'Freelance Correspondent Network',loc:'Worldwide',d:`Open call for local reporters, photographers and translators. Tell us where you are based, what you cover and share two published examples.`}
+];
+
+/* ===== Open Desk app: routing, rendering, interactions ===== */
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const xesc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const mem={};
+const store={
+  get(k,d){ if(k in mem) return mem[k]; try{const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ mem[k]=v; try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+};
+
+/* ---------- i18n ---------- */
+const T={
+en:{home:'Home',world:'World',politics:'Politics',business:'Business',technology:'Technology',science:'Science',health:'Health',sports:'Sports',culture:'Culture',opinion:'Opinion',videos:'Videos',more:'More',travel:'Travel',education:'Education',top:'Top Stories',around:'Around the World',trending:'Trending Now',opinionH:'Opinion & Analysis',watch:'Watch',picks:"Editor's Picks",loadmore:'Load more stories',subscribe:'Subscribe',search:'Search',breaking:'Breaking',newsH:"Get the world's top stories in your inbox every morning.",newsP:'One email a day. No spam. Unsubscribe any time.',readnext:'Read next',comments:'Comments',takeaways:'Key takeaways',minread:'min read',viewall:'View all',related:'Related stories',searchPh:'Search stories, topics, authors',emailPh:'Your email address',signup:'Sign up',langNote:'Interface language changed. Stories are published in English.',menu:'Menu'},
+ur:{home:'ہوم',world:'دنیا',politics:'سیاست',business:'کاروبار',technology:'ٹیکنالوجی',science:'سائنس',health:'صحت',sports:'کھیل',culture:'ثقافت',opinion:'رائے',videos:'ویڈیوز',more:'مزید',travel:'سفر',education:'تعلیم',top:'اہم خبریں',around:'دنیا بھر سے',trending:'ابھی مقبول',opinionH:'رائے اور تجزیہ',watch:'دیکھیں',picks:'ایڈیٹر کا انتخاب',loadmore:'مزید خبریں دیکھیں',subscribe:'سبسکرائب',search:'تلاش',breaking:'تازہ خبر',newsH:'ہر صبح دنیا کی اہم خبریں اپنے ان باکس میں حاصل کریں۔',newsP:'روزانہ ایک ای میل۔ کوئی سپیم نہیں۔',readnext:'اگلا پڑھیں',comments:'تبصرے',takeaways:'کلیدی نکات',minread:'منٹ کا مطالعہ',viewall:'سب دیکھیں',related:'متعلقہ خبریں',searchPh:'خبریں، موضوعات، مصنفین تلاش کریں',emailPh:'آپ کا ای میل ایڈریس',signup:'سائن اپ',langNote:'انٹرفیس کی زبان تبدیل ہو گئی۔ خبریں انگریزی میں شائع ہوتی ہیں۔',menu:'مینیو'},
+ar:{home:'الرئيسية',world:'العالم',politics:'سياسة',business:'أعمال',technology:'تكنولوجيا',science:'علوم',health:'صحة',sports:'رياضة',culture:'ثقافة',opinion:'رأي',videos:'فيديو',more:'المزيد',travel:'سفر',education:'تعليم',top:'أبرز الأخبار',around:'حول العالم',trending:'الأكثر رواجًا',opinionH:'رأي وتحليل',watch:'شاهد',picks:'اختيارات المحرر',loadmore:'عرض المزيد من الأخبار',subscribe:'اشترك',search:'بحث',breaking:'عاجل',newsH:'احصل على أبرز أخبار العالم في بريدك كل صباح.',newsP:'رسالة واحدة يوميًا. بلا إزعاج.',readnext:'اقرأ التالي',comments:'التعليقات',takeaways:'أبرز النقاط',minread:'دقائق قراءة',viewall:'عرض الكل',related:'أخبار ذات صلة',searchPh:'ابحث عن أخبار ومواضيع وكتّاب',emailPh:'بريدك الإلكتروني',signup:'سجّل',langNote:'تم تغيير لغة الواجهة. تُنشر الأخبار بالإنجليزية.',menu:'القائمة'},
+es:{home:'Inicio',world:'Mundo',politics:'Política',business:'Economía',technology:'Tecnología',science:'Ciencia',health:'Salud',sports:'Deportes',culture:'Cultura',opinion:'Opinión',videos:'Vídeos',more:'Más',travel:'Viajes',education:'Educación',top:'Principales noticias',around:'Alrededor del mundo',trending:'Tendencias',opinionH:'Opinión y análisis',watch:'Ver',picks:'Selección del editor',loadmore:'Cargar más noticias',subscribe:'Suscribirse',search:'Buscar',breaking:'Última hora',newsH:'Recibe cada mañana las noticias más importantes del mundo en tu correo.',newsP:'Un correo al día. Sin spam.',readnext:'Leer a continuación',comments:'Comentarios',takeaways:'Puntos clave',minread:'min de lectura',viewall:'Ver todo',related:'Noticias relacionadas',searchPh:'Busca noticias, temas, autores',emailPh:'Tu correo electrónico',signup:'Registrarse',langNote:'Idioma de la interfaz cambiado. Las noticias se publican en inglés.',menu:'Menú'},
+fr:{home:'Accueil',world:'Monde',politics:'Politique',business:'Économie',technology:'Technologie',science:'Sciences',health:'Santé',sports:'Sport',culture:'Culture',opinion:'Opinions',videos:'Vidéos',more:'Plus',travel:'Voyage',education:'Éducation',top:'À la une',around:'Autour du monde',trending:'Tendances',opinionH:'Opinions et analyses',watch:'Regarder',picks:'Choix de la rédaction',loadmore:"Voir plus d'articles",subscribe:"S'abonner",search:'Rechercher',breaking:'Dernière minute',newsH:'Recevez chaque matin les grands titres du monde dans votre boîte mail.',newsP:'Un e-mail par jour. Pas de spam.',readnext:'À lire ensuite',comments:'Commentaires',takeaways:"L'essentiel",minread:'min de lecture',viewall:'Tout voir',related:'Articles liés',searchPh:'Rechercher articles, sujets, auteurs',emailPh:'Votre adresse e-mail',signup:"S'inscrire",langNote:"Langue de l'interface modifiée. Les articles sont publiés en anglais.",menu:'Menu'},
+hi:{home:'होम',world:'दुनिया',politics:'राजनीति',business:'कारोबार',technology:'तकनीक',science:'विज्ञान',health:'स्वास्थ्य',sports:'खेल',culture:'संस्कृति',opinion:'राय',videos:'वीडियो',more:'और',travel:'यात्रा',education:'शिक्षा',top:'मुख्य खबरें',around:'दुनिया भर से',trending:'ट्रेंडिंग',opinionH:'राय और विश्लेषण',watch:'देखें',picks:'संपादक की पसंद',loadmore:'और खबरें देखें',subscribe:'सब्सक्राइब करें',search:'खोजें',breaking:'ताज़ा खबर',newsH:'हर सुबह दुनिया की मुख्य खबरें अपने इनबॉक्स में पाएं।',newsP:'रोज़ एक ईमेल। कोई स्पैम नहीं।',readnext:'आगे पढ़ें',comments:'टिप्पणियाँ',takeaways:'मुख्य बातें',minread:'मिनट पढ़ें',viewall:'सभी देखें',related:'संबंधित खबरें',searchPh:'खबरें, विषय, लेखक खोजें',emailPh:'आपका ईमेल पता',signup:'साइन अप',langNote:'इंटरफ़ेस की भाषा बदल गई। खबरें अंग्रेज़ी में प्रकाशित होती हैं।',menu:'मेनू'}
+};
+const LANGS=[['en','English'],['ur','اردو'],['ar','العربية'],['es','Español'],['fr','Français'],['hi','हिन्दी']];
+const LOC={en:'en-GB',ur:'ur-PK',ar:'ar',es:'es',fr:'fr',hi:'hi-IN'};
+const S={lang:'en',top:6,sec:6,region:'Asia',q:'',scat:'all',ssort:'new',rs:8};
+const t=k=>(T[S.lang]&&T[S.lang][k])||T.en[k]||k;
+const catName=c=>t(c);
+
+/* ---------- data prep ---------- */
+const AU=AUTHORS;
+ARTICLES.forEach(a=>{
+  a.words=[a.sub,...a.body.map(b=>typeof b==='string'?b:(b.h||b.q))].join(' ').split(/\s+/).length;
+  a.read=Math.max(1,Math.round(a.words/200));
+  a.date=new Date(Date.now()-a.d*864e5);
+  a.text=(a.title+' '+a.sub+' '+AU[a.by].name+' '+a.cat+' '+a.body.map(b=>typeof b==='string'?b:(b.h||b.q)).join(' ')).toLowerCase();
+});
+const BY={}; ARTICLES.forEach(a=>BY[a.id]=a);
+const SORTED=[...ARTICLES].sort((a,b)=>a.d-b.d);
+const HERO_IDS=['climate-talks','emerging-markets','ai-daily-life','sleep-science','football-rise'];
+const TREND=['ai-daily-life','climate-talks','sleep-science','hidden-destinations','football-rise','emerging-markets','street-food','sustainable-cities','online-learning','independent-journalism'];
+const fmtDate=(d,long)=>d.toLocaleDateString(LOC[S.lang]||'en-GB',long?{weekday:'long',day:'numeric',month:'long',year:'numeric'}:{day:'numeric',month:'short',year:'numeric'});
+const reads=()=>store.get('od_reads',{});
+
+/* ---------- icons ---------- */
+const I={
+ search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+ sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+ moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13.5A8.5 8.5 0 1110.5 3 6.5 6.5 0 0021 13.5z"/></svg>',
+ menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+ close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+ play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
+ pause:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>',
+ left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+ up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg>',
+ vol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 010 7"/></svg>',
+ mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>',
+ link:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>',
+ x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 4l14 16M19 4L5 20"/></svg>',
+ fb:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8V6.5c0-.8.2-1.2 1.3-1.2H17V2h-2.6C11.3 2 10 3.7 10 6.2V8H8v3.3h2V22h4v-10.7h2.6L17 8z"/></svg>',
+ yt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 7.2a2.5 2.5 0 00-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 002.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 001.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 001.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5 3z"/></svg>',
+ ig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor"/></svg>',
+ li:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9h3.8v11H4.5zM6.4 3.5a2.2 2.2 0 110 4.4 2.2 2.2 0 010-4.4zM10 9h3.6v1.5c.5-.9 1.7-1.8 3.5-1.8 3.7 0 4.4 2.4 4.4 5.6V20h-3.8v-5c0-1.2 0-2.7-1.7-2.7s-2 1.300-2 2.600V20H10z"/></svg>',
+ wa:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.6-4.8A8.5 8.5 0 1112 20.5a8.400 8.400 0 01-4-1z"/></svg>'
+};
+const LOGO=`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="9" fill="currentColor"/><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="24" cy="24" r="12"/><ellipse cx="24" cy="24" rx="5.2" ry="12"/><path d="M12 24h24"/></g><path d="M8 38h32" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".6"/></svg>`;
+
+/* ---------- generated cover art (images from other hosts are blocked, so artwork is drawn in SVG) ---------- */
+const PAL=[['#0B3C8A','#2F7BF0'],['#082C66','#2B8AD9'],['#0B3C8A','#17A3C9'],['#13306F','#5B86F0'],['#0A2F73','#63AEFF']];
+const M={
+ globe:'<g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".92"><circle cx="400" cy="225" r="120"/><ellipse cx="400" cy="225" rx="52" ry="120"/><path d="M280 225h240M296 160h208M296 290h208"/></g><g fill="#fff"><circle cx="548" cy="128" r="6" opacity=".8"/><circle cx="236" cy="318" r="5" opacity=".6"/><circle cx="560" cy="300" r="4" opacity=".5"/></g>',
+ chart:'<g fill="#fff" opacity=".93"><rect x="262" y="272" width="50" height="62" rx="4"/><rect x="336" y="236" width="50" height="98" rx="4"/><rect x="410" y="196" width="50" height="138" rx="4"/><rect x="484" y="146" width="50" height="188" rx="4"/></g><path d="M258 246L360 204L436 168L552 104" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/><path d="M552 104l-6 26M552 104l-26 8" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".55"/>',
+ chip:'<g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".93"><rect x="330" y="155" width="140" height="140" rx="16"/><rect x="368" y="193" width="64" height="64" rx="8"/><path d="M360 155v-34M400 155v-34M440 155v-34M360 295v34M400 295v34M440 295v34M330 185h-34M330 225h-34M330 265h-34M470 185h34M470 225h34M470 265h34"/></g>',
+ moon:'<path d="M440 118A112 112 0 1 0 530 292 92 92 0 0 1 440 118z" fill="#fff" opacity=".93"/><g fill="#fff"><circle cx="560" cy="150" r="5"/><circle cx="600" cy="220" r="3.5" opacity=".7"/><circle cx="520" cy="96" r="3.5" opacity=".7"/><circle cx="262" cy="130" r="4" opacity=".8"/></g>',
+ ball:'<g fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity=".93"><circle cx="400" cy="225" r="112"/><polygon points="400,180 443,211 427,262 373,262 357,211"/><path d="M400 180V114M443 211l62-20M427 262l38 52M373 262l-38 52M357 211l-62-20"/></g>',
+ city:'<g fill="#fff" opacity=".93"><rect x="250" y="240" width="56" height="100" rx="3"/><rect x="318" y="178" width="64" height="162" rx="3"/><rect x="394" y="128" width="70" height="212" rx="3"/><rect x="476" y="204" width="58" height="136" rx="3"/><rect x="546" y="262" width="44" height="78" rx="3"/></g><g fill="#0B3C8A" opacity=".55"><rect x="334" y="196" width="10" height="10"/><rect x="354" y="196" width="10" height="10"/><rect x="334" y="222" width="10" height="10"/><rect x="354" y="222" width="10" height="10"/><rect x="412" y="150" width="10" height="10"/><rect x="436" y="150" width="10" height="10"/><rect x="412" y="176" width="10" height="10"/><rect x="436" y="176" width="10" height="10"/><rect x="412" y="202" width="10" height="10"/><rect x="436" y="202" width="10" height="10"/></g><path d="M220 340h390" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".6"/>',
+ bowl:'<path d="M290 232h220a110 110 0 0 1-220 0z" fill="#fff" opacity=".93"/><path d="M350 200c-14-20 14-30 0-52M400 200c-14-20 14-30 0-52M450 200c-14-20 14-30 0-52" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/><path d="M500 150l86-48M512 168l90-42" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".75"/>',
+ quote:'<text x="400" y="330" text-anchor="middle" font-family="Merriweather,Georgia,serif" font-weight="900" font-size="300" fill="#fff" opacity=".93">&#8220;</text>',
+ pin:'<path d="M400 112c-52 0-94 42-94 94 0 74 94 152 94 152s94-78 94-152c0-52-42-94-94-94z" fill="#fff" opacity=".93"/><circle cx="400" cy="206" r="34" fill="#0B3C8A" opacity=".8"/><path d="M230 340c70-34 130-8 170 18s110 30 170-12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="3 15" opacity=".6"/>',
+ book:'<g fill="#fff" opacity=".93"><path d="M400 162C346 132 282 134 236 152v178c46-18 110-20 164 10z"/><path d="M400 162c54-30 118-28 164-10v178c-46-18-110-20-164 10z" opacity=".8"/></g><path d="M400 162v178" stroke="#0B3C8A" stroke-width="4" opacity=".5"/>',
+ vote:'<g fill="#fff" opacity=".93"><rect x="290" y="215" width="220" height="130" rx="10"/></g><rect x="350" y="236" width="100" height="12" rx="6" fill="#0B3C8A" opacity=".7"/><g transform="rotate(-8 400 190)"><rect x="352" y="106" width="96" height="116" rx="6" fill="#fff" opacity=".85"/><path d="M372 150l14 14 28-32" fill="none" stroke="#0B3C8A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>'
+};
+let gid=0;
+function cover(o,label){
+  const p=PAL[(o.pal||0)%PAL.length], id='g'+(++gid);
+  return `<svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(label||o.title)}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${p[0]}"/><stop offset="1" stop-color="${p[1]}"/></linearGradient></defs><rect width="800" height="450" fill="url(#${id})"/><circle cx="690" cy="60" r="150" fill="#fff" opacity=".07"/><circle cx="90" cy="420" r="130" fill="#fff" opacity=".06"/>${M[o.motif]||M.globe}</svg>`;
+}
+const hue=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%360;return h;};
+const avatar=(name,sz=44)=>{const i=name.replace(/^Dr\.\s*/,'').split(' ').map(w=>w[0]).slice(0,2).join('');const h=210+(hue(name)%40);return `<span class="av" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.38)}px;background:hsl(${h} 70% 38%)" aria-hidden="true">${esc(i)}</span>`;};
+
+/* ---------- components ---------- */
+const meta=a=>`<span class="meta"><span>${esc(AU[a.by].name)}</span><span>${fmtDate(a.date)}</span><span>${a.read} ${t('minread')}</span></span>`;
+const card=(a,o={})=>`<a class="card" href="#article-${a.id}"><span class="cov ${o.r||'r169'}">${cover(a)}</span><span class="tag">${esc(catName(a.cat))}</span><h3>${esc(a.title)}</h3>${o.nosum?'':`<p>${esc(a.sub)}</p>`}${meta(a)}</a>`;
+const rowCard=a=>`<a class="row" href="#article-${a.id}"><span class="cov sq">${cover(a)}</span><span><span class="tag">${esc(catName(a.cat))}</span><h3>${esc(a.title)}</h3>${meta(a)}</span></a>`;
+const secHead=(title,link)=>`<div class="sec-h"><h2>${esc(title)}</h2>${link||''}</div>`;
+const ad=(k,label)=>`<a class="ad ${k}" href="#advertise" aria-label="Advertisement. Advertise with Open Desk"><b>Advertisement</b><span>${esc(label)}</span></a>`;
+const nlForm=(id)=>`<form class="nl-form" data-form="newsletter" novalidate><label class="sr-only" for="${id}">${esc(t('emailPh'))}</label><input id="${id}" type="email" name="email" placeholder="${esc(t('emailPh'))}" autocomplete="email" required><button class="btn white" type="submit">${esc(t('signup'))}</button></form><p class="nl-msg" role="status" aria-live="polite"></p>`;
+
+/* ---------- shell ---------- */
+function buildHeader(){
+  const feats=SORTED.filter(a=>!a.brief).slice(0,9);
+  const tk=feats.map(a=>`<a href="#article-${a.id}">${esc(a.title)}</a>`).join('');
+  const paused=$('#tkTrack')&&$('#tkTrack').classList.contains('paused');
+  $('#hdr').innerHTML=`
+  <div class="topbar"><div class="wrap">
+    <span class="tb-date" id="tbDate">${esc(fmtDate(new Date(),true))}</span>
+    <div class="tb-ctrl">
+      <label class="sr-only" for="langSel">Language</label>
+      <select class="lang" id="langSel">${LANGS.map(l=>`<option value="${l[0]}" ${l[0]===S.lang?'selected':''}>${l[1]}</option>`).join('')}</select>
+      <button class="icon-btn" data-act="theme" id="themeBtn" aria-label="Toggle dark mode"></button>
+      <button class="icon-btn" data-act="open-search" aria-label="${esc(t('search'))}" aria-keyshortcuts="/">${I.search}</button>
+      <button class="btn white sm" data-act="open-sub">${esc(t('subscribe'))}</button>
+    </div>
+  </div></div>
+  <div class="ticker"><div class="wrap">
+    <span class="brk">${esc(t('breaking'))}</span>
+    <div class="tk-view" aria-label="Headlines"><div class="tk-track${paused?' paused':''}" id="tkTrack"><span>${tk}</span><span aria-hidden="true">${tk.replace(/href=/g,'tabindex="-1" href=')}</span></div></div>
+    <button class="tk-btn" data-act="tk-toggle" id="tkBtn" aria-label="${paused?'Resume':'Pause'} headlines">${paused?I.play:I.pause}</button>
+  </div></div>
+  <div class="mast"><div class="wrap">
+    <a class="logo" href="#home" aria-label="Open Desk home">${LOGO}<span><b>Open Desk</b><small>Every Story. Every Corner. Open to All.</small></span></a>
+    ${ad('banner','468 × 60 · Your brand here')}
+  </div></div>
+  <nav class="nav" aria-label="Main"><div class="wrap">
+    <span class="nav-title">${esc(t('menu'))}</span>
+    <button class="icon-btn burger" data-act="menu" id="burger" aria-expanded="false" aria-controls="navList" aria-label="${esc(t('menu'))}">${I.menu}</button>
+    <ul id="navList">
+      <li><a class="nl" href="#home" data-r="home">${esc(t('home'))}</a></li>
+      ${NAV_MAIN.map(c=>`<li><a class="nl" href="#${c}" data-r="${c}">${esc(t(c))}</a></li>`).join('')}
+      <li><a class="nl" href="#videos" data-r="videos">${esc(t('videos'))}</a></li>
+      <li class="more"><button class="nl" data-act="more" id="moreBtn" aria-expanded="false" aria-haspopup="true">${esc(t('more'))} <span aria-hidden="true">&nbsp;▾</span></button>
+        <div class="sub" id="sub">${NAV_MORE.map(c=>`<a href="#${c}" data-r="${c}">${esc(t(c))}</a>`).join('')}<a href="#about" data-r="about">About</a><a href="#contact" data-r="contact">Contact</a><a href="#careers" data-r="careers">Careers</a></div>
+      </li>
+    </ul>
+  </div></nav>`;
+  syncTheme(); markNav();
+}
+function buildFooter(){
+  $('#ftr').innerHTML=`<div class="wrap ft">
+    <div><a class="logo" href="#home">${LOGO}<span><b>Open Desk</b><small>Every Story. Every Corner. Open to All.</small></span></a>
+      <p style="margin-top:16px">Open Desk is an independent global news and blog platform. We publish clear, balanced reporting and explainers for readers in every region.</p>
+      <button class="lnk" data-act="show-rss">RSS feed</button></div>
+    <div><h3>Sections</h3><ul>${[...NAV_MAIN,'travel','education'].map(c=>`<li><a href="#${c}">${esc(t(c))}</a></li>`).join('')}<li><a href="#videos">${esc(t('videos'))}</a></li></ul></div>
+    <div><h3>Company</h3><ul><li><a href="#about">About us</a></li><li><a href="#standards">Editorial standards</a></li><li><a href="#careers">Careers</a></li><li><a href="#advertise">Advertise with us</a></li><li><a href="#contact">Contact</a></li></ul></div>
+    <div><h3>Follow us</h3>
+      <div class="soc">
+        <a href="${SOCIAL.x}" target="_blank" rel="noopener" aria-label="Open Desk on X">${I.x}</a>
+        <a href="${SOCIAL.facebook}" target="_blank" rel="noopener" aria-label="Open Desk on Facebook">${I.fb}</a>
+        <a href="${SOCIAL.youtube}" target="_blank" rel="noopener" aria-label="Open Desk on YouTube">${I.yt}</a>
+        <a href="${SOCIAL.instagram}" target="_blank" rel="noopener" aria-label="Open Desk on Instagram">${I.ig}</a>
+        <a href="${SOCIAL.linkedin}" target="_blank" rel="noopener" aria-label="Open Desk on LinkedIn">${I.li}</a>
+      </div>
+      <h3>Newsletter</h3>${nlForm('ftEmail')}</div>
+  </div>
+  <div class="wrap legal"><span>© 2026 Open Desk. All rights reserved. Demo content: stories and bylines are placeholders.</span>
+    <ul><li><a href="#privacy">Privacy</a></li><li><a href="#terms">Terms of use</a></li><li><button class="lnk" data-act="cookie-open">Cookie settings</button></li><li><button class="lnk" data-act="show-sitemap">Sitemap</button></li></ul></div>`;
+}
+function markNav(){
+  const r=route().r==='section'?route().cat:route().r;
+  $$('#hdr [data-r]').forEach(a=>{ if(a.dataset.r===r) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+}
+
+/* ---------- views ---------- */
+function viewHome(){
+  const lead=BY['climate-talks'], side=HERO_IDS.slice(1).map(i=>BY[i]);
+  const topList=SORTED.filter(a=>!HERO_IDS.includes(a.id));
+  const rd=reads();
+  const tr=TREND.map((id,i)=>({a:BY[id],s:(10-i)*100+(rd[id]||0)*150})).sort((x,y)=>y.s-x.s);
+  const shown=topList.slice(0,S.top);
+  const regionList=SORTED.filter(a=>a.regions.includes(S.region)).slice(0,3);
+  const catRows=['business','technology','sports','health'].map(c=>{
+    const l=SORTED.filter(a=>a.cat===c).sort((a,b)=>(b.brief?0:1)-(a.brief?0:1)).slice(0,4);
+    return `<section class="sec tight"><div class="wrap">${secHead(t(c),`<a href="#${c}">${esc(t('viewall'))}</a>`)}<div class="grid g4">${l.map(a=>card(a,{nosum:1,r:'r43'})).join('')}</div></div></section>`;
+  }).join('');
+  const op=[BY['independent-journalism'],BY['emerging-markets'],BY['voter-information']];
+  const opLabel=['Opinion','Analysis','Analysis'];
+  const picks=ARTICLES.filter(a=>a.ed);
+  return `
+  <section class="sec tight"><div class="wrap hero">
+    <a class="lead" href="#article-${lead.id}"><span class="cov r169">${cover(lead)}</span>
+      <span><span class="tag red">${esc(t('breaking'))}</span> <span class="tag">${esc(catName(lead.cat))}</span></span>
+      <h2>${esc(lead.title)}</h2><p>${esc(lead.sub)}</p>${meta(lead)}</a>
+    <div>${side.map(rowCard).join('')}</div>
+  </div></section>
+  <section class="sec"><div class="wrap cols">
+    <div>${secHead(t('top'))}<div class="grid g2" id="topGrid">${shown.map(a=>card(a)).join('')}</div>
+      ${S.top<topList.length?`<div class="more-wrap"><button class="btn ghost" data-act="more-top">${esc(t('loadmore'))} (${topList.length-S.top})</button></div>`:''}</div>
+    <aside class="stack" aria-label="${esc(t('trending'))}">
+      <div>${secHead(t('trending'))}<ol class="trend">${tr.map((x,i)=>`<li><a href="#article-${x.a.id}"><span class="n">${i+1}</span><span><b>${esc(x.a.title)}</b><small>${esc(catName(x.a.cat))}</small></span></a></li>`).join('')}</ol></div>
+      ${ad('side','300 × 250 · Sidebar')}
+    </aside>
+  </div></section>
+  <section class="sec band"><div class="wrap">${secHead(t('around'))}
+    <div class="tabs" role="tablist" aria-label="${esc(t('around'))}">${REGIONS.map(r=>`<button role="tab" id="tab-${r.replace(/\s/g,'')}" aria-selected="${r===S.region}" aria-controls="regPanel" tabindex="${r===S.region?0:-1}" data-act="region" data-region="${r}">${r}</button>`).join('')}</div>
+    <div id="regPanel" role="tabpanel" aria-labelledby="tab-${S.region.replace(/\s/g,'')}" class="grid g3">${regionList.map(a=>card(a)).join('')}</div>
+  </div></section>
+  ${catRows}
+  <section class="sec band"><div class="wrap">${secHead(t('opinionH'),`<a href="#opinion">${esc(t('viewall'))}</a>`)}
+    <div class="grid g3">${op.map((a,i)=>`<a class="op-card" href="#article-${a.id}"><span class="who">${avatar(AU[a.by].name,52)}<span><b>${esc(AU[a.by].name)}</b><small>${esc(opLabel[i])} · ${esc(AU[a.by].role)}</small></span></span><h3>${esc(a.title)}</h3><p style="color:var(--muted);font-size:.93rem">${esc(a.sub)}</p></a>`).join('')}</div>
+  </div></section>
+  <section class="sec"><div class="wrap">${secHead(t('watch'),`<a href="#videos">${esc(t('viewall'))}</a>`)}<div class="grid g3">${VIDEOS.slice(0,3).map(vidCard).join('')}</div></div></section>
+  <section class="sec band"><div class="wrap">
+    <div class="sec-h"><h2>${esc(t('picks'))}</h2><div class="car-nav"><button class="icon-btn line" data-act="car" data-dir="-1" id="carPrev" aria-label="Previous">${I.left}</button><button class="icon-btn line" data-act="car" data-dir="1" id="carNext" aria-label="Next">${I.right}</button></div></div>
+    <div class="car" id="car" tabindex="0" aria-label="${esc(t('picks'))}">${picks.map(a=>card(a,{nosum:1})).join('')}</div>
+  </div></section>
+  <section class="sec"><div class="wrap"><div class="news"><div><h2>${esc(t('newsH'))}</h2><p>${esc(t('newsP'))}</p></div><div>${nlForm('nlHome')}</div></div></div></section>`;
+}
+const fmtDur=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const vidCard=v=>`<button class="vid" data-act="play-video" data-id="${v.id}"><span class="cov r169">${cover(v)}<span class="play"><i>${I.play}</i></span><span class="dur">${fmtDur(v.dur)}</span></span><h3>${esc(v.title)}</h3><p>${esc(v.desc)}</p></button>`;
+
+function viewVideos(){
+  return `<header class="page-h"><div class="wrap"><div class="crumbs"><a href="#home">${esc(t('home'))}</a> / ${esc(t('videos'))}</div><h1>${esc(t('videos'))}</h1><p>Short explainers and field reports. These are sample players: connect your video host to publish real clips.</p></div></header>
+  <section class="sec"><div class="wrap grid g3">${VIDEOS.map(vidCard).join('')}</div></section>`;
+}
+
+function viewSection(c){
+  let list=SORTED.filter(a=>a.cat===c);
+  if(S.ssort==='read'){const rd=reads();list=[...list].sort((a,b)=>(rd[b.id]||0)-(rd[a.id]||0)||a.d-b.d);}
+  const shown=list.slice(0,S.sec);
+  const extra=list.length<4?SORTED.filter(a=>a.cat!==c&&!a.brief).slice(0,4):[];
+  return `<header class="page-h"><div class="wrap"><div class="crumbs"><a href="#home">${esc(t('home'))}</a> / ${esc(t(c))}</div><h1>${esc(t(c))}</h1><p>${esc(CATS[c].d)}</p></div></header>
+  <section class="sec"><div class="wrap cols"><div>
+    <div class="bar"><span class="meta">${list.length} ${list.length===1?'story':'stories'}</span>
+      <label class="meta" style="align-items:center;gap:8px;display:flex">Sort <select class="sel" id="secSort"><option value="new" ${S.ssort==='new'?'selected':''}>Newest</option><option value="read" ${S.ssort==='read'?'selected':''}>Most read</option></select></label></div>
+    <div class="grid g2">${shown.map(a=>card(a)).join('')}</div>
+    ${S.sec<list.length?`<div class="more-wrap"><button class="btn ghost" data-act="more-sec">${esc(t('loadmore'))} (${list.length-S.sec})</button></div>`:''}
+    ${extra.length?`<div style="margin-top:48px">${secHead('More from Open Desk')}<div class="grid g2">${extra.map(a=>card(a,{nosum:1})).join('')}</div></div>`:''}
+  </div><aside class="stack">${ad('side','300 × 250 · Sidebar')}<div class="panel-box"><h3>${esc(t('newsH'))}</h3>${nlForm('nlSec')}</div></aside></div></section>`;
+}
+
+function viewArticle(a){
+  const au=AU[a.by], rd=reads();
+  const url=encodeURIComponent(location.href.split('#')[0]+'#article-'+a.id), tx=encodeURIComponent(a.title);
+  let pc=0;
+  const body=a.body.map(b=>{
+    if(typeof b==='string'){pc++;return `<p>${esc(b)}</p>`+(pc===2&&!a.brief?ad('inline','In-article · 728 × 120'):'');}
+    if(b.h) return `<h2>${esc(b.h)}</h2>`;
+    return `<blockquote class="pq">${esc(b.q)}</blockquote>`;
+  }).join('');
+  const related=SORTED.filter(x=>x.id!==a.id).sort((x,y)=>(y.cat===a.cat)-(x.cat===a.cat)||x.d-y.d).slice(0,3);
+  const i=SORTED.findIndex(x=>x.id===a.id), next=SORTED[(i+1)%SORTED.length];
+  const tr=TREND.map(id=>BY[id]).slice(0,5);
+  const cm=store.get('od_c_'+a.id,[]);
+  return `<div class="wrap art-cols"><article class="art">
+    <div class="crumbs"><a href="#home">${esc(t('home'))}</a> / <a href="#${a.cat}">${esc(catName(a.cat))}</a></div>
+    <span class="tag">${esc(catName(a.cat))}${a.brief?' · Brief':''}</span>
+    <h1>${esc(a.title)}</h1><p class="dek">${esc(a.sub)}</p>
+    <div class="byline">${avatar(au.name,44)}<span class="who"><span><b>${esc(au.name)}</b><small>${esc(au.role)}</small></span></span><span class="meta"><span>${fmtDate(a.date,true)}</span><span>${a.read} ${t('minread')}</span></span></div>
+    <figure class="fig"><span class="cov r169">${cover(a)}</span><figcaption>Illustration: ${esc(a.title)}. Replace with your own photography.</figcaption></figure>
+    <div class="share"><span class="lbl">Share</span>
+      <a href="https://twitter.com/intent/tweet?text=${tx}&url=${url}" target="_blank" rel="noopener">${I.x.replace('<svg','<svg width="14" height="14"')} X</a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=${url}" target="_blank" rel="noopener">${I.fb.replace('<svg','<svg width="14" height="14"')} Facebook</a>
+      <a href="https://wa.me/?text=${tx}%20${url}" target="_blank" rel="noopener">${I.wa} WhatsApp</a>
+      <a href="https://www.linkedin.com/sharing/share-offsite/?url=${url}" target="_blank" rel="noopener">${I.li.replace('<svg','<svg width="14" height="14"')} LinkedIn</a>
+      <button data-act="copy-link" type="button">${I.link} Copy link</button></div>
+    <section class="takeaways" aria-label="${esc(t('takeaways'))}"><h2>${esc(t('takeaways'))}</h2><ul>${a.tk.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
+    <div class="prose">${body}</div>
+    <div class="bio">${avatar(au.name,60)}<div><b>${esc(au.name)}</b> <span class="meta" style="display:inline">${esc(au.role)}</span><p>${esc(au.bio)}</p></div></div>
+    <section class="cmt" aria-labelledby="cmtH"><h2 id="cmtH">${esc(t('comments'))} (<span id="cmtN">${cm.length}</span>)</h2>
+      <form data-form="comment" data-id="${a.id}" novalidate>
+        <div class="field"><label for="cmName">Name</label><input id="cmName" name="name" maxlength="60" autocomplete="name" required><span class="err" data-err="name"></span></div>
+        <div class="field"><label for="cmText">Your comment</label><textarea id="cmText" name="text" maxlength="1200" required></textarea><span class="hint">Be respectful. Comments are saved on this device in this demo.</span><span class="err" data-err="text"></span></div>
+        <button class="btn" type="submit">Post comment</button></form>
+      <div id="cmList">${cmHtml(cm)}</div></section>
+    <div class="nextbox"><span class="tag">${esc(t('readnext'))}</span><div style="margin-top:14px">${rowCard(next)}</div></div>
+    <div style="margin-top:44px">${secHead(t('related'))}<div class="grid g3">${related.map(x=>card(x,{nosum:1,r:'r43'})).join('')}</div></div>
+  </article>
+  <aside><div class="side-sticky">${ad('side','300 × 250 · Sidebar')}<div>${secHead(t('trending'))}<ol class="trend">${tr.map((x,k)=>`<li><a href="#article-${x.id}"><span class="n">${k+1}</span><span><b>${esc(x.title)}</b><small>${esc(catName(x.cat))}</small></span></a></li>`).join('')}</ol></div>
+  <div class="panel-box"><h3>${esc(t('newsH'))}</h3>${nlForm('nlArt')}</div></div></aside></div>`;
+}
+const cmHtml=cm=>cm.length?cm.map(c=>`<div class="cmt-item"><b>${esc(c.n)}</b><small>${esc(new Date(c.t).toLocaleString(LOC[S.lang]||'en-GB',{dateStyle:'medium',timeStyle:'short'}))}</small><p>${esc(c.x)}</p></div>`).join(''):`<p class="meta" style="margin-top:18px">No comments yet. Start the conversation.</p>`;
+
+function viewSearch(){
+  const res=runSearch(S.q,S.scat,S.ssort==='read'?'new':S.ssort);
+  const cats=['all',...Object.keys(CATS)];
+  return `<header class="page-h"><div class="wrap"><div class="crumbs"><a href="#home">${esc(t('home'))}</a> / ${esc(t('search'))}</div><h1>${esc(t('search'))}</h1></div></header>
+  <section class="sec"><div class="wrap" style="max-width:900px">
+    <form class="srch" data-form="search-page" role="search"><label class="sr-only" for="sq">${esc(t('searchPh'))}</label><input id="sq" type="search" value="${esc(S.q)}" placeholder="${esc(t('searchPh'))}" autocomplete="off"><button class="btn" type="submit">${esc(t('search'))}</button></form>
+    <div class="bar"><div class="chips" role="group" aria-label="Filter by category">${cats.map(c=>`<button class="chip" data-act="scat" data-c="${c}" aria-pressed="${S.scat===c}">${c==='all'?'All':esc(t(c))}</button>`).join('')}</div>
+      <label class="meta" style="display:flex;align-items:center;gap:8px">Sort <select class="sel" id="srSort"><option value="rel" ${S.ssort!=='new'?'selected':''}>Best match</option><option value="new" ${S.ssort==='new'?'selected':''}>Newest</option></select></label></div>
+    <p class="meta" style="margin-bottom:8px" role="status" aria-live="polite">${res.length} result${res.length===1?'':'s'}${S.q?` for “${esc(S.q)}”`:''}</p>
+    ${res.length?`<div>${res.slice(0,S.rs).map(rowCard).join('')}</div>${res.length>S.rs?`<div class="more-wrap"><button class="btn ghost" data-act="more-rs">${esc(t('loadmore'))}</button></div>`:''}`:
+    `<div class="empty"><h3>No stories found</h3><p>Try a different word or remove the category filter.</p><p style="margin-top:14px" class="chips" style="justify-content:center">${['climate','sleep','football','travel','economy'].map(w=>`<button class="chip" data-act="quick-search" data-q="${w}">${w}</button>`).join('')}</p></div>`}
+  </div></section>`;
+}
+function runSearch(q,cat,sort){
+  const terms=q.toLowerCase().split(/\s+/).filter(Boolean);
+  let l=ARTICLES.filter(a=>cat==='all'||a.cat===cat);
+  if(terms.length){
+    l=l.map(a=>{let s=0;for(const w of terms){if(!a.text.includes(w)){s=-1;break;}s+=a.title.toLowerCase().includes(w)?5:0;s+=a.sub.toLowerCase().includes(w)?2:0;s+=1;}return{a,s};}).filter(x=>x.s>=0);
+    l=sort==='new'?l.sort((x,y)=>x.a.d-y.a.d):l.sort((x,y)=>y.s-x.s||x.a.d-y.a.d);
+    return l.map(x=>x.a);
+  }
+  return l.sort((x,y)=>x.d-y.d);
+}
+
+/* ---------- static pages ---------- */
+function formField(id,label,type,extra=''){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" name="${id}" type="${type}" ${extra}><span class="err" data-err="${id}"></span></div>`;}
+function viewAbout(){return `<div class="wrap page"><h1>About Open Desk</h1><p class="lede">Open Desk is a global news and blog platform built on one idea: every reader, in every region, deserves clear and balanced information.</p>
+ <h2>What we do</h2><p>We publish reporting, explainers and opinion from writers in six regions: Asia, Europe, Africa, the Americas, the Middle East and Oceania. We write in plain language, show our sources and correct our mistakes in the open.</p>
+ <div class="tiles"><div class="tile"><h3>Accurate</h3><p>Facts are checked before publication, and corrections are labelled.</p></div><div class="tile"><h3>Balanced</h3><p>We present the strongest versions of competing views.</p></div><div class="tile"><h3>Global</h3><p>Stories reflect the places they come from, not only the places they reach.</p></div><div class="tile"><h3>Open</h3><p>Our standards, funding and corrections are public.</p></div></div>
+ <h2>The desk</h2><div class="tiles">${Object.values(AU).map(a=>`<div class="tile"><span class="who">${avatar(a.name,44)}<span><b>${esc(a.name)}</b><small>${esc(a.role)}</small></span></span></div>`).join('')}</div>
+ <h2>About this demo</h2><p>The stories, bylines and videos on this site are placeholders created to show how Open Desk works. Replace them with your own reporting before publishing.</p></div>`;}
+function viewStandards(){return `<div class="wrap page"><h1>Editorial standards</h1><p class="lede">How we decide what to publish, and what we do when we get it wrong.</p>
+ <h2>Accuracy</h2><p>Every factual claim must be supported by a named source, a document or direct observation. We prefer primary sources and say clearly when a claim cannot be verified.</p>
+ <h2>Independence</h2><p>Advertisers and sponsors have no influence over coverage. Sponsored content is labelled and kept visually separate from reporting.</p>
+ <h2>Fairness and balance</h2><p>We give people and organisations that are criticised a fair chance to respond. In opinion pieces, we label the writer's view and publish a range of voices.</p>
+ <h2>Corrections</h2><p>When we make an error, we correct it promptly, add a note explaining what changed and keep the original date. To report a mistake, use the <a href="#contact">contact form</a>.</p>
+ <h2>Use of AI</h2><p>If AI tools assist with research or drafting, a human editor reviews and takes responsibility for the final text. We do not publish AI-generated images as photographs.</p></div>`;}
+function viewPrivacy(){return `<div class="wrap page"><h1>Privacy policy</h1><p class="lede">Sample policy for the demo. Have a legal adviser review and adapt it before launch.</p>
+ <h2>What we collect</h2><p>Email addresses you give us for newsletters, messages sent through our forms, and basic usage data such as pages viewed, if you accept analytics cookies.</p>
+ <h2>How we use it</h2><p>To send the newsletters you ask for, reply to your messages, understand which stories readers value and keep the site secure.</p>
+ <h2>Cookies</h2><p>Essential cookies keep the site working, for example to remember your language and theme. Analytics cookies are optional and used only if you accept them. You can change your choice any time from <button class="lnk" style="background:none;border:0;color:var(--link);text-decoration:underline;padding:0;font:inherit" data-act="cookie-open">Cookie settings</button>.</p>
+ <h2>Your rights</h2><p>You can ask to see, correct or delete your personal data. Contact us through the <a href="#contact">contact form</a>.</p></div>`;}
+function viewTerms(){return `<div class="wrap page"><h1>Terms of use</h1><p class="lede">Sample terms for the demo. Have a legal adviser review them before launch.</p>
+ <h2>Using Open Desk</h2><p>You may read and share our stories for personal, non-commercial use, with a link back to the original. Please do not copy full articles to other sites.</p>
+ <h2>Comments</h2><p>Keep comments civil. We may remove comments that contain abuse, hate, spam or personal information.</p>
+ <h2>Accuracy and liability</h2><p>We work hard to be accurate but cannot guarantee that every article is free of errors. Health, legal and financial content is general information, not professional advice.</p>
+ <h2>Changes</h2><p>We may update these terms. Continued use of the site means you accept the changes.</p></div>`;}
+function viewContact(){return `<div class="wrap page"><h1>Contact</h1><p class="lede">Story tips, corrections, partnership ideas or feedback: we read every message.</p>
+ <div class="two"><div id="formBox"><form data-form="contact" novalidate>
+ ${formField('ctName','Your name','text','autocomplete="name" required')}${formField('ctEmail','Email','email','autocomplete="email" required')}
+ <div class="field"><label for="ctTopic">Topic</label><select id="ctTopic" name="topic"><option>Story tip</option><option>Correction</option><option>Partnership</option><option>General feedback</option></select></div>
+ <div class="field"><label for="ctMsg">Message</label><textarea id="ctMsg" name="msg" required></textarea><span class="err" data-err="ctMsg"></span></div>
+ <button class="btn" type="submit">Send message</button></form></div>
+ <div><h2 style="margin-top:0">Newsroom</h2><p>Corrections and tips are reviewed by the editors within two working days.</p><h2>Support</h2><p>Questions about newsletters or your account? Use the form and choose “General feedback”.</p></div></div></div>`;}
+function viewAdvertise(){return `<div class="wrap page"><h1>Advertise with Open Desk</h1><p class="lede">Reach readers in every region with formats that respect their attention.</p>
+ <div class="tiles"><div class="tile"><h3>Display banners</h3><p>468 × 60 header, 300 × 250 sidebar and 728 × 120 in-article placements.</p></div><div class="tile"><h3>Sponsored stories</h3><p>Clearly labelled articles written with your team, kept separate from our reporting.</p></div><div class="tile"><h3>Newsletter slots</h3><p>A single message in our morning briefing, sent to subscribers.</p></div></div>
+ <h2>Request the media kit</h2><div id="formBox"><form data-form="advertise" novalidate>
+ ${formField('adCo','Company','text','required')}${formField('adEmail','Work email','email','autocomplete="email" required')}
+ <div class="field"><label for="adBudget">Monthly budget</label><select id="adBudget"><option>Under $1,000</option><option>$1,000 to $5,000</option><option>$5,000 to $20,000</option><option>Over $20,000</option></select></div>
+ <div class="field"><label for="adMsg">Tell us about your campaign</label><textarea id="adMsg"></textarea></div>
+ <button class="btn" type="submit">Request media kit</button></form></div></div>`;}
+function viewCareers(){return `<div class="wrap page"><h1>Careers</h1><p class="lede">Help us tell the world's stories. We hire for curiosity, care and craft, wherever you are.</p>
+ ${JOBS.map(j=>`<details class="job"><summary><span>${esc(j.t)}</span><small>${esc(j.loc)}</small></summary><div class="jb"><p>${esc(j.d)}</p><button class="btn sm" data-act="apply" data-id="${j.id}">Apply for this role</button></div></details>`).join('')}</div>`;}
+function view404(){return `<div class="wrap page"><h1>Story not found</h1><p class="lede">The page you opened does not exist or has moved.</p><p><a class="btn" href="#home">Back to the homepage</a></p></div>`;}
+
+/* ---------- routing ---------- */
+const STATIC=['videos','about','contact','advertise','privacy','terms','standards','careers','search'];
+function route(){
+  const h=location.hash.replace(/^#/,'');
+  if(!h||h==='home') return {r:'home'};
+  if(h.startsWith('article-')) return {r:'article',id:h.slice(8)};
+  if(CATS[h]) return {r:'section',cat:h};
+  if(STATIC.includes(h)) return {r:h};
+  return {r:'404'};
+}
+function setMeta(title,desc,og){
+  document.title=title;
+  let m=$('meta[name="description"]'); if(!m){m=document.createElement('meta');m.name='description';document.head.appendChild(m);} m.content=desc;
+  [['og:title',title],['og:description',desc],['og:type',og||'website'],['og:site_name','Open Desk']].forEach(([p,v])=>{let e=$(`meta[property="${p}"]`);if(!e){e=document.createElement('meta');e.setAttribute('property',p);document.head.appendChild(e);}e.content=v;});
+  let ld=$('#ld'); if(ld) ld.remove();
+}
+function render(keepScroll){
+  const R=route(); let html,title='Open Desk',desc='Open Desk is a global news and blog platform: every story, every corner, open to all.';
+  document.body.classList.remove('is-art');
+  switch(R.r){
+    case 'home':html=viewHome();break;
+    case 'section':html=viewSection(R.cat);title=t(R.cat)+' | Open Desk';desc=CATS[R.cat].d;break;
+    case 'article':{const a=BY[R.id];if(!a){html=view404();break;}
+      html=viewArticle(a);title=a.title+' | Open Desk';desc=a.sub;
+      const rd=reads();rd[a.id]=(rd[a.id]||0)+1;store.set('od_reads',rd);
+      document.body.classList.add('is-art');break;}
+    case 'videos':html=viewVideos();title='Videos | Open Desk';break;
+    case 'search':html=viewSearch();title='Search | Open Desk';break;
+    case 'about':html=viewAbout();title='About | Open Desk';break;
+    case 'contact':html=viewContact();title='Contact | Open Desk';break;
+    case 'advertise':html=viewAdvertise();title='Advertise | Open Desk';break;
+    case 'privacy':html=viewPrivacy();title='Privacy policy | Open Desk';break;
+    case 'terms':html=viewTerms();title='Terms of use | Open Desk';break;
+    case 'standards':html=viewStandards();title='Editorial standards | Open Desk';break;
+    case 'careers':html=viewCareers();title='Careers | Open Desk';break;
+    default:html=view404();
+  }
+  $('#app').innerHTML=html;
+  setMeta(title,desc,R.r==='article'?'article':'website');
+  if(R.r==='article'){const a=BY[R.id];if(a){const s=document.createElement('script');s.type='application/ld+json';s.id='ld';
+    s.textContent=JSON.stringify({'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description:a.sub,datePublished:a.date.toISOString(),author:{'@type':'Person',name:AU[a.by].name},publisher:{'@type':'Organization',name:'Open Desk'},articleSection:a.cat});document.head.appendChild(s);}}
+  markNav(); closeMenus();
+  if(!keepScroll){window.scrollTo(0,0);}
+  updateCar(); onScroll();
+}
+function rerender(){const y=window.scrollY;render(true);window.scrollTo(0,y);}
+window.addEventListener('hashchange',()=>{closeModal(true);S.top=6;S.sec=6;S.rs=8;if(route().r!=='search')S.ssort='new';render();const m=$('#app');m.setAttribute('tabindex','-1');m.focus({preventScroll:true});});
+
+/* ---------- theme ---------- */
+const effTheme=()=>document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+function syncTheme(){const b=$('#themeBtn');if(!b)return;const d=effTheme()==='dark';b.innerHTML=d?I.sun:I.moon;b.setAttribute('aria-pressed',String(d));b.setAttribute('aria-label',d?'Switch to light mode':'Switch to dark mode');}
+function setTheme(v){document.documentElement.dataset.theme=v;store.set('od_theme',v);syncTheme();}
+
+/* ---------- menus, toasts, modal ---------- */
+function closeMenus(){const l=$('#navList'),b=$('#burger'),s=$('#sub'),m=$('#moreBtn');if(l)l.classList.remove('open');if(b)b.setAttribute('aria-expanded','false');if(s)s.classList.remove('open');if(m)m.setAttribute('aria-expanded','false');}
+let toastT;function toast(msg){const e=$('#toast');e.textContent=msg;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,3200);}
+let lastFocus=null, vTimer=null;
+function openModal(html,cls=''){const m=$('#modal');$('#modalBody').innerHTML=html;m.className='modal '+cls;m.hidden=false;document.body.classList.add('lock');lastFocus=document.activeElement;const f=$('#modalBody [autofocus]')||$('#modalBody input,#modalBody button,#modalBody select');if(f)f.focus();}
+function closeModal(silent){const m=$('#modal');if(m.hidden)return;stopVideo();m.hidden=true;$('#modalBody').innerHTML='';document.body.classList.remove('lock');if(!silent&&lastFocus&&lastFocus.focus)lastFocus.focus();}
+const X=`<button class="x" data-act="close-modal" aria-label="Close">${I.close.replace('<svg','<svg width="18" height="18"')}</button>`;
+function copyText(txt,okMsg){
+  const fb=()=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy');}catch(e){}ta.remove();toast(ok?okMsg:'Press Ctrl+C to copy');};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast(okMsg),fb);}else fb();
+}
+
+/* search overlay */
+function openSearch(){
+  openModal(`${X}<h2>${esc(t('search'))}</h2><form data-form="search-modal" role="search"><label class="sr-only" for="qm">${esc(t('searchPh'))}</label><div class="srch" style="margin:0"><input id="qm" type="search" autofocus value="${esc(S.q)}" placeholder="${esc(t('searchPh'))}" autocomplete="off"><button class="btn" type="submit">${esc(t('search'))}</button></div></form><ul class="res" id="qRes"></ul>`,'top');
+  fillResults(S.q);
+}
+function fillResults(q){
+  const ul=$('#qRes');if(!ul)return;
+  const r=q.trim()?runSearch(q,'all','rel').slice(0,6):SORTED.filter(a=>!a.brief).slice(0,5);
+  ul.innerHTML=(q.trim()?'':`<li class="meta" style="margin:4px 6px 4px">Latest stories</li>`)+(r.length?r.map(a=>`<li><a href="#article-${a.id}"><span class="cov sq">${cover(a)}</span><span><b>${esc(a.title)}</b><small>${esc(catName(a.cat))}, ${esc(AU[a.by].name)}</small></span></a></li>`).join(''):`<li class="empty">No stories match “${esc(q)}”. Press Enter to open the full search.</li>`);
+}
+function openSub(){
+  openModal(`${X}<h2>${esc(t('subscribe'))} to Open Desk</h2><p class="sub-t">${esc(t('newsH'))}</p>
+  <form data-form="subscribe" novalidate>${formField('sbEmail','Email address','email','autocomplete="email" required autofocus')}
+  <div class="field"><label for="sbFreq">How often</label><select id="sbFreq"><option>Every morning</option><option>Weekly roundup</option></select></div>
+  <fieldset class="field" style="border:0;padding:0;margin:0 0 16px"><legend>Topics</legend><div class="checks">${['world','business','technology','health','sports','culture'].map(c=>`<label><input type="checkbox" name="topics" value="${c}" ${['world','business'].includes(c)?'checked':''}> ${esc(t(c))}</label>`).join('')}</div></fieldset>
+  <button class="btn" type="submit">${esc(t('subscribe'))}</button></form>`);
+}
+function showXml(kind){
+  const base=location.href.split('#')[0];
+  let xml,name;
+  if(kind==='rss'){name='RSS feed';xml=`<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0">\n<channel>\n  <title>Open Desk</title>\n  <link>${xesc(base)}</link>\n  <description>Every Story. Every Corner. Open to All.</description>\n`+SORTED.slice(0,20).map(a=>`  <item>\n    <title>${xesc(a.title)}</title>\n    <link>${xesc(base)}#article-${a.id}</link>\n    <description>${xesc(a.sub)}</description>\n    <category>${xesc(a.cat)}</category>\n    <pubDate>${a.date.toUTCString()}</pubDate>\n  </item>`).join('\n')+`\n</channel>\n</rss>`;}
+  else{name='XML sitemap';xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`+[['',1],...Object.keys(CATS).map(c=>['#'+c,.8]),...ARTICLES.map(a=>['#article-'+a.id,.6])].map(([p,pr])=>`  <url><loc>${xesc(base)}${p}</loc><priority>${pr}</priority></url>`).join('\n')+`\n</urlset>`;}
+  S._xml=xml;
+  openModal(`${X}<h2>${name}</h2><p class="sub-t">Generated from the stories on this site. Copy it into a file named ${kind==='rss'?'feed.xml':'sitemap.xml'} on your own domain.</p><pre tabindex="0">${esc(xml)}</pre><button class="btn" data-act="copy-xml">Copy ${name}</button>`,'wide');
+}
+
+/* video player */
+let VS=null;
+function openVideo(id){
+  const v=VIDEOS.find(x=>x.id===id);if(!v)return;
+  VS={v,pos:0,playing:false,muted:false};
+  openModal(`${X}<h2>${esc(v.title)}</h2><div class="player" id="player"><span class="cov r169">${cover(v)}</span><button class="big" data-act="vplay" aria-label="Play video"><i>${I.play}</i></button></div>
+  <div class="pc"><button class="icon-btn line" data-act="vplay" id="vBtn" aria-label="Play">${I.play}</button><input type="range" id="vSeek" min="0" max="${v.dur}" value="0" step="1" aria-label="Seek"><time id="vTime">0:00 / ${fmtDur(v.dur)}</time><button class="icon-btn line" data-act="vmute" id="vMute" aria-label="Mute">${I.vol}</button></div>
+  <p class="sub-t" style="margin-top:14px">${esc(v.desc)} This is a sample player with no audio. Connect your video host to publish real clips.</p>`,'wide');
+}
+function vUpdate(){if(!VS)return;const s=$('#vSeek'),tm=$('#vTime');if(!s)return;s.value=VS.pos;tm.textContent=`${fmtDur(VS.pos)} / ${fmtDur(VS.v.dur)}`;const b=$('#vBtn');b.innerHTML=VS.playing?I.pause:I.play;b.setAttribute('aria-label',VS.playing?'Pause':'Play');$('#player').classList.toggle('playing',VS.playing);$('.big').setAttribute('aria-label',VS.playing?'Pause video':'Play video');}
+function vToggle(){if(!VS)return;if(VS.playing){VS.playing=false;clearInterval(vTimer);}else{if(VS.pos>=VS.v.dur)VS.pos=0;VS.playing=true;clearInterval(vTimer);vTimer=setInterval(()=>{VS.pos=Math.min(VS.v.dur,VS.pos+.25);if(VS.pos>=VS.v.dur){VS.playing=false;clearInterval(vTimer);}vUpdate();},250);}vUpdate();}
+function stopVideo(){clearInterval(vTimer);VS=null;}
+
+/* carousel */
+function updateCar(){const c=$('#car');if(!c)return;const p=$('#carPrev'),n=$('#carNext');const rtl=document.dir==='rtl';const max=c.scrollWidth-c.clientWidth-2;const x=Math.abs(c.scrollLeft);p.disabled=x<=2;n.disabled=x>=max;p.style.opacity=p.disabled?.4:1;n.style.opacity=n.disabled?.4:1;}
+
+/* ---------- scroll ---------- */
+function onScroll(){
+  const y=window.scrollY,tt=$('#toTop');if(tt)tt.hidden=y<700;
+  const pg=$('#prog');if(pg){if(document.body.classList.contains('is-art')){const h=document.documentElement.scrollHeight-innerHeight;pg.style.width=(h>0?Math.min(100,y/h*100):0)+'%';}else pg.style.width='0';}
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+document.addEventListener('scroll',e=>{if(e.target&&e.target.id==='car')updateCar();},true);
+window.addEventListener('resize',updateCar);
+
+/* ---------- forms ---------- */
+const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+function setErr(form,key,msg){const e=$(`[data-err="${key}"]`,form);if(e)e.textContent=msg||'';const i=$('#'+key,form)||$(`[name="${key}"]`,form);if(i){if(msg)i.setAttribute('aria-invalid','true');else i.removeAttribute('aria-invalid');}}
+function ok(box,h,p){box.innerHTML=`<div class="okbox" role="status"><h3>${h}</h3><p>${p}</p></div>`;}
+document.addEventListener('submit',e=>{
+  const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
+  const kind=f.dataset.form;
+  if(kind==='newsletter'){
+    const inp=$('input[type=email]',f),msg=f.nextElementSibling;
+    if(!emailOk(inp.value)){msg.textContent='Enter a valid email address, such as name@example.com.';msg.classList.add('bad');inp.setAttribute('aria-invalid','true');inp.focus();return;}
+    inp.removeAttribute('aria-invalid');const l=store.get('od_subs',[]);if(!l.includes(inp.value.trim()))l.push(inp.value.trim());store.set('od_subs',l);
+    msg.classList.remove('bad');msg.textContent='You are subscribed. Check your inbox for a welcome note. (Demo: saved on this device only.)';inp.value='';toast('Subscribed to the Open Desk newsletter');return;}
+  if(kind==='subscribe'){
+    const em=$('#sbEmail',f);if(!emailOk(em.value)){setErr(f,'sbEmail','Enter a valid email address.');em.focus();return;}
+    const topics=$$('input[name=topics]:checked',f).map(x=>x.value);const l=store.get('od_subs',[]);if(!l.includes(em.value.trim()))l.push(em.value.trim());store.set('od_subs',l);store.set('od_topics',topics);
+    $('#modalBody').innerHTML=`${X}<h2>You're in</h2><p class="sub-t">We will send ${esc($('#sbFreq',f).value.toLowerCase())} to ${esc(em.value.trim())}${topics.length?`, covering ${esc(topics.map(c=>t(c)).join(', '))}`:''}. (Demo: saved on this device only.)</p><button class="btn" data-act="close-modal" autofocus>Done</button>`;
+    $('#modalBody button[autofocus]').focus();toast('Subscribed');return;}
+  if(kind==='search-modal'){S.q=$('#qm').value.trim();S.scat='all';S.ssort='rel';S.rs=8;closeModal(true);if(location.hash==='#search')render();else location.hash='search';return;}
+  if(kind==='search-page'){S.q=$('#sq').value.trim();S.rs=8;rerender();$('#sq').focus();const i=$('#sq');i.setSelectionRange(i.value.length,i.value.length);return;}
+  if(kind==='comment'){
+    const n=$('#cmName',f),x=$('#cmText',f);let bad=false;
+    setErr(f,'name',''); setErr(f,'text','');
+    if(!n.value.trim()){setErr(f,'name','Enter your name.');bad=true;}
+    if(x.value.trim().length<3){setErr(f,'text','Write at least a few words.');bad=true;}
+    if(bad){(n.value.trim()?x:n).focus();return;}
+    const key='od_c_'+f.dataset.id,l=store.get(key,[]);l.unshift({n:n.value.trim(),x:x.value.trim(),t:Date.now()});store.set(key,l);
+    $('#cmList').innerHTML=cmHtml(l);$('#cmtN').textContent=l.length;x.value='';toast('Comment posted');return;}
+  if(kind==='contact'||kind==='advertise'){
+    const em=$('input[type=email]',f);let bad=false;
+    $$('input[required],textarea[required]',f).forEach(i=>{const k=i.id;setErr(f,k,'');if(!i.value.trim()){setErr(f,k,'This field is required.');bad=true;}else if(i.type==='email'&&!emailOk(i.value)){setErr(f,k,'Enter a valid email address.');bad=true;}});
+    if(bad){const first=$('[aria-invalid="true"]',f);if(first)first.focus();return;}
+    const key=kind==='contact'?'od_msgs':'od_ads',l=store.get(key,[]);l.push({t:Date.now(),email:em.value.trim()});store.set(key,l);
+    ok($('#formBox'),kind==='contact'?'Message received':'Request received',`Thank you. We will reply to ${esc(em.value.trim())} soon. (Demo: saved on this device only.)`);toast('Sent');return;}
+  if(kind==='apply'){
+    const nm=$('#apName',f),em=$('#apEmail',f);let bad=false;setErr(f,'apName','');setErr(f,'apEmail','');
+    if(!nm.value.trim()){setErr(f,'apName','Enter your name.');bad=true;}
+    if(!emailOk(em.value)){setErr(f,'apEmail','Enter a valid email address.');bad=true;}
+    if(bad){(nm.value.trim()?em:nm).focus();return;}
+    $('#modalBody').innerHTML=`${X}<h2>Application received</h2><p class="sub-t">Thanks, ${esc(nm.value.trim())}. We will be in touch at ${esc(em.value.trim())}. (Demo: saved on this device only.)</p><button class="btn" data-act="close-modal" autofocus>Close</button>`;$('#modalBody button[autofocus]').focus();return;}
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='qm')fillResults(e.target.value);
+  if(e.target.id==='vSeek'&&VS){VS.pos=+e.target.value;vUpdate();}
+});
+document.addEventListener('change',e=>{
+  const id=e.target.id;
+  if(id==='langSel')setLang(e.target.value);
+  if(id==='secSort'){S.ssort=e.target.value;S.sec=6;rerender();}
+  if(id==='srSort'){S.ssort=e.target.value;rerender();}
+});
+
+/* ---------- language ---------- */
+function setLang(l){
+  S.lang=l;store.set('od_lang',l);
+  const d=document.documentElement;d.lang=l;d.dir=(l==='ar'||l==='ur')?'rtl':'ltr';
+  buildHeader();buildFooter();rerender();
+  if(l!=='en')toast(t('langNote'));
+}
+
+/* ---------- click actions ---------- */
+const ACT={
+ 'menu'(){const l=$('#navList'),b=$('#burger'),o=l.classList.toggle('open');b.setAttribute('aria-expanded',String(o));b.innerHTML=o?I.close:I.menu;},
+ 'more'(){const s=$('#sub'),b=$('#moreBtn'),o=s.classList.toggle('open');b.setAttribute('aria-expanded',String(o));},
+ 'theme'(){setTheme(effTheme()==='dark'?'light':'dark');},
+ 'open-search'(){openSearch();},
+ 'open-sub'(){openSub();},
+ 'close-modal'(){closeModal();},
+ 'tk-toggle'(){const tr=$('#tkTrack'),b=$('#tkBtn'),p=tr.classList.toggle('paused');b.innerHTML=p?I.play:I.pause;b.setAttribute('aria-label',p?'Resume headlines':'Pause headlines');},
+ 'more-top'(){S.top+=6;const y=scrollY;render(true);scrollTo(0,y);},
+ 'more-sec'(){S.sec+=6;const y=scrollY;render(true);scrollTo(0,y);},
+ 'more-rs'(){S.rs+=8;const y=scrollY;render(true);scrollTo(0,y);},
+ 'region'(el){S.region=el.dataset.region;const p=$('#regPanel'),list=SORTED.filter(a=>a.regions.includes(S.region)).slice(0,3);
+   $$('.tabs [role=tab]').forEach(b=>{const on=b.dataset.region===S.region;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;});
+   p.setAttribute('aria-labelledby','tab-'+S.region.replace(/\s/g,''));p.innerHTML=list.map(a=>card(a)).join('');},
+ 'car'(el){const c=$('#car');const w=c.clientWidth*.85*(+el.dataset.dir)*(document.dir==='rtl'?-1:1);c.scrollBy({left:w,behavior:'smooth'});setTimeout(updateCar,450);},
+ 'copy-link'(){copyText(location.href,'Link copied');},
+ 'play-video'(el){openVideo(el.dataset.id);},
+ 'vplay'(){vToggle();},
+ 'vmute'(el){if(!VS)return;VS.muted=!VS.muted;el.innerHTML=VS.muted?I.mute:I.vol;el.setAttribute('aria-label',VS.muted?'Unmute':'Mute');},
+ 'show-rss'(){showXml('rss');},
+ 'show-sitemap'(){showXml('sitemap');},
+ 'copy-xml'(){copyText(S._xml||'','Copied to clipboard');},
+ 'scat'(el){S.scat=el.dataset.c;S.rs=8;rerender();},
+ 'quick-search'(el){S.q=el.dataset.q;S.scat='all';rerender();},
+ 'apply'(el){const j=JOBS.find(x=>x.id===el.dataset.id);openModal(`${X}<h2>Apply: ${esc(j.t)}</h2><p class="sub-t">${esc(j.loc)}</p><form data-form="apply" novalidate>${formField('apName','Full name','text','autocomplete="name" required autofocus')}${formField('apEmail','Email','email','autocomplete="email" required')}<div class="field"><label for="apLink">Portfolio or LinkedIn link</label><input id="apLink" type="url" placeholder="https://"></div><div class="field"><label for="apNote">Why this role?</label><textarea id="apNote"></textarea></div><button class="btn" type="submit">Submit application</button></form>`);},
+ 'cookie-accept'(){store.set('od_cookie','all');$('#cookie').hidden=true;toast('Preferences saved: all cookies');},
+ 'cookie-essential'(){store.set('od_cookie','essential');$('#cookie').hidden=true;toast('Preferences saved: essential cookies only');},
+ 'cookie-open'(){$('#cookie').hidden=false;},
+ 'to-top'(){scrollTo({top:0,behavior:'smooth'});$('#hdr a')&&$('#hdr a').focus({preventScroll:true});}
+};
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');
+  if(el&&ACT[el.dataset.act]){ACT[el.dataset.act](el,e);return;}
+  const a=e.target.closest('a[href^="#"]');
+  if(a){ if(!e.target.closest('#modal')||true){ if($('#modal')&&!$('#modal').hidden)closeModal(true);} if(a.getAttribute('href')===location.hash){render();} }
+  if(!e.target.closest('.more'))$('#sub')&&$('#sub').classList.remove('open'),$('#moreBtn')&&$('#moreBtn').setAttribute('aria-expanded','false');
+});
+document.addEventListener('keydown',e=>{
+  const m=$('#modal');
+  if(e.key==='Escape'){ if(!m.hidden){closeModal();return;} closeMenus(); }
+  if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&m.hidden){e.preventDefault();openSearch();}
+  if(e.key==='Tab'&&!m.hidden){const f=$$('button,a[href],input,select,textarea,[tabindex="0"]',$('.dlg',m)).filter(x=>!x.disabled&&x.offsetParent!==null);if(!f.length)return;const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+  const tab=e.target.closest&&e.target.closest('[role=tab]');
+  if(tab&&(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='Home'||e.key==='End')){
+    const tabs=$$('.tabs [role=tab]');let i=tabs.indexOf(tab);const rtl=document.dir==='rtl';
+    if(e.key==='ArrowRight')i+=rtl?-1:1;else if(e.key==='ArrowLeft')i+=rtl?1:-1;else if(e.key==='Home')i=0;else i=tabs.length-1;
+    i=(i+tabs.length)%tabs.length;tabs[i].focus();ACT.region(tabs[i]);e.preventDefault();}
+});
+
+/* ---------- boot ---------- */
+function boot(){
+  const th=store.get('od_theme',null);if(th)document.documentElement.dataset.theme=th;
+  const l=store.get('od_lang','en');if(T[l]){S.lang=l;document.documentElement.lang=l;document.documentElement.dir=(l==='ar'||l==='ur')?'rtl':'ltr';}
+  buildHeader();buildFooter();render();
+  if(!store.get('od_cookie',null))$('#cookie').hidden=false;
+  matchMedia('(prefers-color-scheme: dark)').addEventListener&&matchMedia('(prefers-color-scheme: dark)').addEventListener('change',syncTheme);
+}
+boot();
+})();
+
+</script>
+
+</body></html>
